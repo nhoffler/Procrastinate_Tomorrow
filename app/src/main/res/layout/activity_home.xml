@@ -1,0 +1,62 @@
+<LinearLayout
+    android:orientation="vertical"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.google.procrastinatelater.HomeActivity"
+    android:weightSum="3">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1">
+
+        <TextView android:text="@string/title_message" android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:paddingTop="25dp"
+            android:textColor="@color/my_plum"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/manage_projects"
+            android:id="@+id/projectsButton"
+            android:onClick="goToProjects"
+            android:layout_gravity="center_horizontal"
+            android:textColor="@color/my_purple"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="50dp"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/view_calendar"
+            android:id="@+id/calendarButton"
+            android:onClick="goToCalendar"
+            android:layout_gravity="center_horizontal"
+            android:textColor="@color/my_purple" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/my_plum">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="@string/no_sessions"
+            android:id="@+id/projectsMessage"
+            android:textColor="#fff7f7f7"
+            android:layout_gravity="center_horizontal|top"
+            android:paddingTop="35dp" />
+    </FrameLayout>
+
+</LinearLayout>

@@ -1,0 +1,44 @@
+<resources>
+    <string name="app_name">Procrastinate Later</string>
+
+
+    <string name="new_project">New Project</string>
+    <string name="new_project_title">New Project Title</string>
+    <string name="project_title">Project Title</string>
+    <string name="select_image">Select an Image</string>
+    <string name="select_due_date">Select a Due Date</string>
+    <string name="opt_cmt">Time Commitment</string>
+    <string name="opt_due">Due Date</string>
+    <string name="opt_lng">Session Length</string>
+    <string name="opt_frq">Session Frequency</string>
+    <string name="create_project">Create Project</string>
+    <string name="update_project">Update Project</string>
+    <string name="date_button_text">Pick Date Here</string>
+
+    <string name="hours">hours</string>
+    <string name="minutes">minutes</string>
+    <string name="times_per">times per</string>
+
+    <string name="project_updated"> has been updated.</string>
+    <string name="project_created"> has been added to your projects!</string>
+    <string name="project_no_title">Missing a Project Title</string>
+    <string name="project_missing_info">Please enter more information about your project.</string>
+    <string name="project_message">Info about existing Project</string>
+
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_home">HomeActivity</string>
+
+    <string name="title_message">Why Procrastinate Today When You Can Procrastinate Tomorrow?</string>
+    <string name="manage_projects">Manage Projects</string>
+    <string name="view_calendar">View Calendar</string>
+    <string name="title_activity_calendar">CalendarActivity</string>
+    <string name="no_sessions">0 sessions planned for today</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="title_tproject_list">tProjects</string>
+    <string name="title_tproject_detail">tProject Detail</string>
+
+<!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_projects_list">ProjectsList</string>
+</resources>
