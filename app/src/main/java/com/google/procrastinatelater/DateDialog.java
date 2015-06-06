@@ -1,5 +1,6 @@
 package com.google.procrastinatelater;
 
+import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -12,12 +13,18 @@ import java.text.DateFormatSymbols;
 import java.util.Calendar;
 
 /**
+ * Creates small calendar to pick a due date
  * Created by Nicole on 16-May-15.
  */
 public class DateDialog extends DialogFragment implements DatePickerDialog.OnDateSetListener{
 
     EditText txtDue;
 
+    public  DateDialog(){
+        //nothing. required to build my apk file??
+    }
+
+    @SuppressLint("ValidFragment")
     public DateDialog(View view){
         txtDue = (EditText)view;
     }
