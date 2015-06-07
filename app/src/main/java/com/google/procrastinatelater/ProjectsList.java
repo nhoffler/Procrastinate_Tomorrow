@@ -3,10 +3,13 @@ package com.google.procrastinatelater;
 import android.app.Activity;
 import android.app.FragmentTransaction;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,6 +25,9 @@ import android.widget.Toast;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
 
 
 public class ProjectsList extends Activity {
@@ -33,6 +39,7 @@ public class ProjectsList extends Activity {
     ImageView projectImageView; //imageview of project we are viewing
     String projectImagePath = null; //current project's image path
     Bitmap myBitmap = null; //supposedly used to create my images from their paths
+//    private static final Uri DEFAULT_URI = Uri.parse(" content://com.android.providers.media.documents/document/image%3A4109"); //default image
     private static final Uri DEFAULT_URI = Uri.parse("android.resource://com.google.procrastinatelater/drawable/default_photo.jpg"); //default image
 
     //background and non-physical components
@@ -45,6 +52,7 @@ public class ProjectsList extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Logger.getGlobal().setLevel(Level.INFO);
         setContentView(R.layout.activity_projects_list);
 
         //set up sidebar
@@ -77,10 +85,17 @@ public class ProjectsList extends Activity {
         projectImageView.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent();
-                intent.setType("image/*");
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(Intent.createChooser(intent, getString(R.string.select_image)), 1);
+                if (Build.VERSION.SDK_INT < 19){
+                    Intent intent = new Intent();
+                    intent.setType("image/*");
+                    intent.setAction(Intent.ACTION_GET_CONTENT);
+                    startActivityForResult(Intent.createChooser(intent, getString(R.string.select_image)), 1);
+                } else {
+                    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                    intent.addCategory(Intent.CATEGORY_OPENABLE);
+                    intent.setType("image/*");
+                    startActivityForResult(Intent.createChooser(intent, getString(R.string.select_image)), 1);
+                }
             }
         });
         txtDueDate = (EditText) findViewById(R.id.txtDueDate); //project due date
@@ -152,10 +167,10 @@ public class ProjectsList extends Activity {
     public void onActivityResult(int reqCode, int resCode, Intent data){
         if (resCode == RESULT_OK){
             if (reqCode == 1){
-                projectImagePath = data.getData().getPath();
+                projectImagePath = data.getData().toString();
                 //projectImageView.setImageURI(
-                findMyImage(projectImagePath, projectImageView);
-                //projectImageView.setImageURI(data.getData());
+                //findMyImage(projectImagePath, projectImageView);
+                projectImageView.setImageURI(data.getData());
             }
         }
     }
@@ -215,10 +230,22 @@ public class ProjectsList extends Activity {
             //skipped image!
             txtProjectTitle.setText(project.getName());
             txtTimeCmt.setText(project.getCmt());
-            txtDueDate.setText(project.getDate());
+            txtDueDate.setText(project.getDueDate());
             txtHrsLong.setText(project.getSnHrs());
             txtMinsLong.setText(project.getSnMins());
             txtFrq.setText(project.getSnFrq());
+            Uri imageUri = Uri.parse(project.getImgPath());
+//            Logger.getLogger(getClass().getName()).info("Looking up picture path to " + imageUri.toString());
+//            String[] filePathColumn = { MediaStore.Images.Media.DATA };
+//            Cursor cursor = getContentResolver().query(imageUri,filePathColumn, null, null, null);
+//            cursor.moveToFirst();
+//            int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+//            String picturePath = cursor.getString(columnIndex);
+//            cursor.close();
+
+            Logger.getLogger(getClass().getName()).info("Setting projectImageView image to " + imageUri);
+        //    projectImageView.setImageBitmap(BitmapFactory.decodeFile(picturePath));
+            projectImageView.setImageURI(imageUri);
             saveProjectButton.setText(getString(R.string.update_project));
             //saveProjectButton.setOnClickListener(updateOnClick());
         }
@@ -260,15 +287,8 @@ public class ProjectsList extends Activity {
                 boolean b_frq = !frq.trim().isEmpty();
 
                 if (b_title){
-                    if (b_howLong && b_frq) { //this conditions covers when all 4 are filled, and half of the 3-filled senarios
-                        Project project = new Project(dbHandler.getProjectCount(), title, cmt, due, hrs, mins, frq, projectImagePath);
-                        dbHandler.createProject(project);
-                        Projects.add(project);
-                        populateList();
-                        Toast.makeText(getApplicationContext(), title + " " + getString(R.string.project_created), Toast.LENGTH_SHORT).show();
-                        Toast.makeText(getApplicationContext(), dbHandler.getProjectCount() + " projects!", Toast.LENGTH_SHORT).show();
-                    } else if ((b_howLong || b_frq) && b_due && b_cmt) { //covers other two 3-filled senarios
-                        Project project = new Project(dbHandler.getProjectCount(), title, cmt, due, hrs, mins, frq, projectImagePath);
+                    if ((b_howLong && b_frq)|| ((b_howLong || b_frq) && b_due && b_cmt)){ //this conditions covers when all 4 are filled, and half of the 3-filled senarios
+                        Project project = new Project(0, title, cmt, due, hrs, mins, frq, projectImagePath);
                         dbHandler.createProject(project);
                         Projects.add(project);
                         populateList();

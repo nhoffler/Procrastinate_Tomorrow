@@ -11,6 +11,7 @@ import android.provider.MediaStore;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Created by Nicole on 20-May-15.
@@ -75,20 +76,25 @@ public class DatabaseHandler extends SQLiteOpenHelper {
      * insert a project into the database
      * @param project project to insert
      */
-    public void createProject(Project project) {
+    public long createProject(Project project) {
         SQLiteDatabase db = getWritableDatabase();
 
         ContentValues values = new ContentValues();
         values.put(KEY_PROJECTNAME, project.getName());
         values.put(KEY_TIMECMT, project.getCmt());
-        values.put(KEY_DUEDATE, project.getDate());
+        values.put(KEY_DUEDATE, project.getDueDate());
         values.put(KEY_HRSLONG, project.getSnHrs());
         values.put(KEY_MINSLONG, project.getSnMins());
         values.put(KEY_FRQ, project.getSnFrq());
         values.put(KEY_IMGPATH, project.getImgPath());
 
-        db.insert(TABLE_PROJECTS, null, values);
+        long generatedKey = db.insert(TABLE_PROJECTS, null, values);
+        project.setId(generatedKey);
         db.close();
+        Logger.getLogger(getClass().getName()).info("Saved "
+                + project.getName() + " project to database with image "
+                + project.getImgPath());
+        return generatedKey;
     }
 
     /**
@@ -96,7 +102,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
      * @param id the project's unique id
      * @return project with that id. Project does not exist if returns null.
      */
-    public Project getProject(int id) {
+    public Project getProject(long id) {
         SQLiteDatabase db = getReadableDatabase();
 
         String[] columns = new String[]{KEY_ID, KEY_PROJECTNAME, KEY_TIMECMT, KEY_DUEDATE, KEY_HRSLONG,
@@ -106,7 +112,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         if (cursor != null) {
             cursor.moveToFirst();
         }
-        project = new Project(Integer.parseInt(cursor.getString(0)),
+        project = new Project(Long.parseLong(cursor.getString(0)),
                 cursor.getString(1), cursor.getString(2), cursor.getString(3), cursor.getString(4),
                 cursor.getString(5), cursor.getString(6), cursor.getString(7));
 
@@ -126,7 +132,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(KEY_PROJECTNAME, project.getName());
         values.put(KEY_TIMECMT, project.getCmt());
-        values.put(KEY_DUEDATE, project.getDate());
+        values.put(KEY_DUEDATE, project.getDueDate());
         values.put(KEY_HRSLONG, project.getSnHrs());
         values.put(KEY_MINSLONG, project.getSnMins());
         values.put(KEY_FRQ, project.getSnFrq());
@@ -173,7 +179,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_PROJECTS, null);
         if (cursor.moveToFirst()){
             do{
-                projects.add(new Project(Integer.parseInt(cursor.getString(0)), cursor.getString(1),
+                projects.add(new Project(Long.parseLong(cursor.getString(0)), cursor.getString(1),
                         cursor.getString(2), cursor.getString(3), cursor.getString(4),
                         cursor.getString(5), cursor.getString(6), cursor.getString(7)));
             }while (cursor.moveToNext());

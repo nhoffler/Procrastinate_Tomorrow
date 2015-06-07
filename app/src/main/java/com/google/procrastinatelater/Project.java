@@ -8,45 +8,82 @@ import java.net.URI;
  * Created by Nicole on 06-May-15.
  */
 public class Project {
-    private String _name, _cmt, _dueDate, _snHrs, _snMins, _snFrq, _imgPath;
-    private int _id;
+    private long iId;
+    private String iName, iCmt, iDueDate, iSnHrs, iSnMins, iSnFrq, iImgPath;
 
-    public Project (int id, String projectName, String timeCmt, String dueDate, String sessionHrs, String sessionMins, String sessionFrq, String imgPath){
-        _id = id;
-        _name = projectName;
-        _cmt = timeCmt;
-        _dueDate = dueDate;
-        _snHrs = sessionHrs;
-        _snMins = sessionMins;
-        _snFrq = sessionFrq;
-        _imgPath = imgPath;
+    public Project(long aId, String aName, String aCmt, String aDueDate, String aSnHrs, String aSnMins, String aSnFrq, String aImgPath) {
+        iId = aId;
+        iName = aName;
+        iCmt = aCmt;
+        iDueDate = aDueDate;
+        iSnHrs = aSnHrs;
+        iSnMins = aSnMins;
+        iSnFrq = aSnFrq;
+        iImgPath = aImgPath;
     }
 
+    public long getId() {
+        return iId;
+    }
+
+    public void setId(long aId){
+        iId = aId;
+    }
+
+
     public String getName() {
-        return _name;
+        return iName;
+    }
+
+    public void setName(String aName) {
+        iName = aName;
     }
 
     public String getCmt() {
-        return _cmt;
+        return iCmt;
     }
 
-    public int getId() {return _id; }
+    public void setCmt(String aCmt) {
+        iCmt = aCmt;
+    }
 
-    public String getDate() {
-        return _dueDate;
+    public String getDueDate() {
+        return iDueDate;
+    }
+
+    public void setDueDate(String aDueDate) {
+        iDueDate = aDueDate;
     }
 
     public String getSnHrs() {
-        return _snHrs;
+        return iSnHrs;
+    }
+
+    public void setSnHrs(String aSnHrs) {
+        iSnHrs = aSnHrs;
     }
 
     public String getSnMins() {
-        return _snMins;
+        return iSnMins;
+    }
+
+    public void setSnMins(String aSnMins) {
+        iSnMins = aSnMins;
     }
 
     public String getSnFrq() {
-        return _snFrq;
+        return iSnFrq;
     }
 
-    public String getImgPath() { return _imgPath; }
+    public void setSnFrq(String aSnFrq) {
+        iSnFrq = aSnFrq;
+    }
+
+    public String getImgPath() {
+        return iImgPath;
+    }
+
+    public void setImgPath(String aImgPath) {
+        iImgPath = aImgPath;
+    }
 }
