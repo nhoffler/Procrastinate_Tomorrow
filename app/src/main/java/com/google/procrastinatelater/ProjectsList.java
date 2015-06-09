@@ -3,13 +3,11 @@ package com.google.procrastinatelater;
 import android.app.Activity;
 import android.app.FragmentTransaction;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -26,27 +24,24 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 
 public class ProjectsList extends Activity {
-    //physical components' variables
+    //'physical' component variables
     FrameLayout newProjectFrame; //clicking this should empty out all fields
     EditText txtProjectTitle, txtTimeCmt, txtDueDate, txtHrsLong, txtMinsLong, txtFrq; //text fields
     Button saveProjectButton; //will change between Create Project and Update Project
-
     ImageView projectImageView; //imageview of project we are viewing
-    String projectImagePath = null; //current project's image path
+
+    String projectImageUri = null; //current project's image path
     Bitmap myBitmap = null; //supposedly used to create my images from their paths
-//    private static final Uri DEFAULT_URI = Uri.parse(" content://com.android.providers.media.documents/document/image%3A4109"); //default image
-    private static final Uri DEFAULT_URI = Uri.parse("android.resource://com.google.procrastinatelater/drawable/default_photo.jpg"); //default image
+    private static final Uri DEFAULT_URI = Uri.parse("android.resource://com.google.procrastinatelater/drawable/default_photo"); //default image
 
     //background and non-physical components
-    List<Project> Projects = new ArrayList<Project>(); //local list of projects. updated from database's copy. Is this a necessary variable?
+    List<Project> projectsList = new ArrayList<>(); //local list of projects. updated from database's copy.
     DatabaseHandler dbHandler;
     ListView projectListView; //my scrolling list of existing projects
-
 
 
     @Override
@@ -68,7 +63,7 @@ public class ProjectsList extends Activity {
         projectListView = (ListView) findViewById(R.id.projectsListView);   //my scrolling list of icons
         dbHandler = new DatabaseHandler(getApplicationContext());   //make connection to database
         if (dbHandler.getProjectCount() != 0){
-            Projects.addAll(dbHandler.getAllProjects());    //add all existing projects to Projects list
+            projectsList.addAll(dbHandler.getAllProjects());    //add all existing projects to Projects list
         }
         populateList(); //set our projectListView's adapter, populate icons
 
@@ -124,15 +119,26 @@ public class ProjectsList extends Activity {
         fillFields(null); //make sure text fields are empty, set up button onClickListener
     }
 
-    private boolean projectExists(Project project){
+    private boolean projectNameExists(Project project){
         String name = project.getName();
-        int projectCount = Projects.size();
+        int projectCount = projectsList.size();
         for (int i = 0; i < projectCount; i++){
-            if (name.compareToIgnoreCase(Projects.get(i).getName()) == 0){
+            if (name.compareToIgnoreCase(projectsList.get(i).getName()) == 0){
                 return true;
             }
         }
         return false;
+    }
+
+    private int findProjectIndex(Project aProject){
+        long id = aProject.getId();
+        int projectCount = projectsList.size();
+        for (int i = 0; i < projectCount; i++){
+            if (id == projectsList.get(i).getId()){
+                return i;
+            }
+        }
+        return -1;
     }
 
     @Override
@@ -167,9 +173,7 @@ public class ProjectsList extends Activity {
     public void onActivityResult(int reqCode, int resCode, Intent data){
         if (resCode == RESULT_OK){
             if (reqCode == 1){
-                projectImagePath = data.getData().toString();
-                //projectImageView.setImageURI(
-                //findMyImage(projectImagePath, projectImageView);
+                projectImageUri = data.getData().toString();
                 projectImageView.setImageURI(data.getData());
             }
         }
@@ -185,7 +189,7 @@ public class ProjectsList extends Activity {
 
     private class ProjectListAdapter extends ArrayAdapter<Project>{
         public ProjectListAdapter(){
-            super(ProjectsList.this, R.layout.projects_list_item, Projects);
+            super(ProjectsList.this, R.layout.projects_list_item, projectsList);
         }
 
         @Override
@@ -194,12 +198,10 @@ public class ProjectsList extends Activity {
                 convertView = getLayoutInflater().inflate(R.layout.projects_list_item, parent, false);
             }
 
-            final Project currentProject = Projects.get(position);
+            final Project currentProject = projectsList.get(position);
             //project image
             ImageView projectImage = (ImageView) convertView.findViewById(R.id.itemImage);
-            //Uri projectUri =
-            //--findUri(currentProject.getImgPath(), projectImage); //findUri, a method inside ProjectsList.java
-            //projectImage.setImageURI(projectUri);
+            //projectImage.setImageURI(Uri.parse(currentProject.getImgPath()));
             //project title
             TextView projectTitle = (TextView) convertView.findViewById(R.id.titleHere);
             projectTitle.setText(currentProject.getName());
@@ -217,6 +219,8 @@ public class ProjectsList extends Activity {
 
     public void fillFields(Project project){
         if (project == null){
+            //set default image
+            projectImageView.setImageURI(DEFAULT_URI);
             //findMyImage(null, projectImageView);
             txtProjectTitle.setText("");
             txtTimeCmt.setText("");
@@ -224,73 +228,60 @@ public class ProjectsList extends Activity {
             txtHrsLong.setText("");
             txtMinsLong.setText("");
             txtFrq.setText("");
-            saveProjectButton.setText(getString(R.string.create_project));
-            saveProjectButton.setOnClickListener(createOnClick());
+            //set create project button's listener
+            buttonToCreate();
+
         }else {
-            //skipped image!
+            //set project image
+            Uri imageUri = Uri.parse(project.getImgPath());
+            Logger.getLogger(getClass().getName()).info("Setting projectImageView image to " + imageUri);
+            //TODO
+            //unedit after deleting old projects
+            // projectImageView.setImageURI(imageUri);
+            //fill text fields
             txtProjectTitle.setText(project.getName());
             txtTimeCmt.setText(project.getCmt());
             txtDueDate.setText(project.getDueDate());
             txtHrsLong.setText(project.getSnHrs());
             txtMinsLong.setText(project.getSnMins());
             txtFrq.setText(project.getSnFrq());
-            Uri imageUri = Uri.parse(project.getImgPath());
-//            Logger.getLogger(getClass().getName()).info("Looking up picture path to " + imageUri.toString());
-//            String[] filePathColumn = { MediaStore.Images.Media.DATA };
-//            Cursor cursor = getContentResolver().query(imageUri,filePathColumn, null, null, null);
-//            cursor.moveToFirst();
-//            int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-//            String picturePath = cursor.getString(columnIndex);
-//            cursor.close();
-
-            Logger.getLogger(getClass().getName()).info("Setting projectImageView image to " + imageUri);
-        //    projectImageView.setImageBitmap(BitmapFactory.decodeFile(picturePath));
-            projectImageView.setImageURI(imageUri);
-            saveProjectButton.setText(getString(R.string.update_project));
-            //saveProjectButton.setOnClickListener(updateOnClick());
-        }
-    }
-
-    private void findMyImage(String imgPath, ImageView imgView){
-        Uri imgUri = DEFAULT_URI;
-        File imgFile = new File(imgPath);
-        if(imgFile.exists())
-        {
-            myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-            imgView.setImageBitmap(myBitmap);
-            //imgUri = Uri.fromFile(imgFile);
-        }else{
-            //imgView.setImageURI(DEFAULT_URI);
+            //set update button listener
+            buttonToUpdate(project);
         }
     }
 
     /**
-     * for creating a new project and saving it to the database
-     * @return an onClickListener for our Create Project button
+     * save project button should say "create" and
+     * add a new project to the database and the projects scroll
      */
-    private View.OnClickListener createOnClick(){
-        View.OnClickListener listenToCreate = new View.OnClickListener() {
+    private void buttonToCreate(){
+        saveProjectButton.setText(getString(R.string.create_project));
+        saveProjectButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //collect values
+                //collect project title
                 String title = String.valueOf(txtProjectTitle.getText());
-                String cmt = String.valueOf(txtTimeCmt.getText());
-                String due = String.valueOf(txtDueDate.getText());
-                String hrs = String.valueOf(txtHrsLong.getText());
-                String mins = String.valueOf(txtMinsLong.getText());
-                String frq = String.valueOf(txtFrq.getText());
-                //boolean is true when the field has been filled. using trim() to take out empty spaces.
+                //boolean is true when title is not empty.
                 boolean b_title = !title.trim().isEmpty();
-                boolean b_cmt = !cmt.trim().isEmpty();
-                boolean b_due = !due.trim().isEmpty();
-                boolean b_howLong = !(hrs.trim().isEmpty() && mins.trim().isEmpty());
-                boolean b_frq = !frq.trim().isEmpty();
 
                 if (b_title){
+                    //collect values
+                    String cmt = String.valueOf(txtTimeCmt.getText());
+                    String due = String.valueOf(txtDueDate.getText());
+                    String hrs = String.valueOf(txtHrsLong.getText());
+                    String mins = String.valueOf(txtMinsLong.getText());
+                    String frq = String.valueOf(txtFrq.getText());
+
+                    //boolean is true when the field has been filled. using trim() to take out empty spaces.
+                    boolean b_cmt = !cmt.trim().isEmpty();
+                    boolean b_due = !due.trim().isEmpty();
+                    boolean b_howLong = !(hrs.trim().isEmpty() && mins.trim().isEmpty());
+                    boolean b_frq = !frq.trim().isEmpty();
+
                     if ((b_howLong && b_frq)|| ((b_howLong || b_frq) && b_due && b_cmt)){ //this conditions covers when all 4 are filled, and half of the 3-filled senarios
-                        Project project = new Project(0, title, cmt, due, hrs, mins, frq, projectImagePath);
+                        Project project = new Project(0, title, cmt, due, hrs, mins, frq, projectImageUri);
                         dbHandler.createProject(project);
-                        Projects.add(project);
+                        projectsList.add(project);
                         populateList();
                         Toast.makeText(getApplicationContext(), title + " " + getString(R.string.project_created), Toast.LENGTH_SHORT).show();
                         Toast.makeText(getApplicationContext(), dbHandler.getProjectCount() + " projects!", Toast.LENGTH_SHORT).show();
@@ -300,48 +291,56 @@ public class ProjectsList extends Activity {
                 } else { //message: no title
                     Toast.makeText(getApplicationContext(), getString(R.string.project_no_title), Toast.LENGTH_SHORT).show();
                 }
-
-
             }
-        };
-        return listenToCreate;
+        });
     }
 
     /**
-     * for updating an existing project
-     * @return an onClickListener for our Update Project button
+     * save project button should say "update" and
+     * update an existing project in the database and the projects scroll
      */
-    private View.OnClickListener updateOnClick(){
-        View.OnClickListener listenToUpdate = new View.OnClickListener() {
+    private void buttonToUpdate(final Project aProject){
+        saveProjectButton.setText(getString(R.string.update_project));
+        saveProjectButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //collect values
+                //collect project title
                 String title = String.valueOf(txtProjectTitle.getText());
-                String cmt = String.valueOf(txtTimeCmt.getText());
-                String due = String.valueOf(txtDueDate.getText());
-                String hrs = String.valueOf(txtHrsLong.getText());
-                String mins = String.valueOf(txtMinsLong.getText());
-                String frq = String.valueOf(txtFrq.getText());
-                //boolean is true when the field has been filled. using trim() to take out empty spaces.
+                //boolean is true when title is not empty.
                 boolean b_title = !title.trim().isEmpty();
-                boolean b_cmt = !cmt.trim().isEmpty();
-                boolean b_due = !due.trim().isEmpty();
-                boolean b_howLong = !(hrs.trim().isEmpty() && mins.trim().isEmpty());
-                boolean b_frq = !frq.trim().isEmpty();
 
                 if (b_title){
-                    if (b_howLong && b_frq) { //this conditions covers when all 4 are filled, and half of the 3-filled senarios
-                        Project project = new Project(dbHandler.getProjectCount(), title, cmt, due, hrs, mins, frq, projectImagePath);
-                        dbHandler.updateProject(project);
-                        //Projects.remove(project);
-                        //Projects.add(project);
-                        //populateList();
-                        Toast.makeText(getApplicationContext(), title + " " + getString(R.string.project_updated), Toast.LENGTH_SHORT).show();
-                    } else if ((b_howLong || b_frq) && b_due && b_cmt) { //covers other two 3-filled senarios
-                        Project project = new Project(dbHandler.getProjectCount(), title, cmt, due, hrs, mins, frq, projectImagePath);
-                        dbHandler.updateProject(project);
-                        //Projects.add(project);
-                        //populateList();
+                    //collect values
+                    String cmt = String.valueOf(txtTimeCmt.getText());
+                    String due = String.valueOf(txtDueDate.getText());
+                    String hrs = String.valueOf(txtHrsLong.getText());
+                    String mins = String.valueOf(txtMinsLong.getText());
+                    String frq = String.valueOf(txtFrq.getText());
+
+                    //boolean is true when the field has been filled. using trim() to take out empty spaces.
+                    boolean b_cmt = !cmt.trim().isEmpty();
+                    boolean b_due = !due.trim().isEmpty();
+                    boolean b_howLong = !(hrs.trim().isEmpty() && mins.trim().isEmpty());
+                    boolean b_frq = !frq.trim().isEmpty();
+
+                    if ((b_howLong && b_frq)|| ((b_howLong || b_frq) && b_due && b_cmt)){ //this conditions covers when all 4 are filled, and half of the 3-filled senarios
+                        aProject.setName(title);
+                        aProject.setCmt(cmt);
+                        aProject.setDueDate(due);
+                        aProject.setSnHrs(hrs);
+                        aProject.setSnMins(mins);
+                        aProject.setSnFrq(frq);
+                        aProject.setImgPath(projectImageUri);
+
+                        dbHandler.updateProject(aProject);
+                        int projectIndex = findProjectIndex(aProject);
+                        //TODO
+                        //try catch??
+                        if (projectIndex != -1){
+                            projectsList.set(projectIndex, aProject);
+                        }
+                        populateList();
+
                         Toast.makeText(getApplicationContext(), title + " " + getString(R.string.project_updated), Toast.LENGTH_SHORT).show();
                     } else { //message: not enough project info
                         Toast.makeText(getApplicationContext(), getString(R.string.project_missing_info), Toast.LENGTH_SHORT).show();
@@ -352,8 +351,7 @@ public class ProjectsList extends Activity {
 
 
             }
-        };
-        return listenToUpdate;
+        });
     }
 
 }
