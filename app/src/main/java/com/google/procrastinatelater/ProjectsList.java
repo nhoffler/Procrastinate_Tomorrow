@@ -3,8 +3,6 @@ package com.google.procrastinatelater;
 import android.app.Activity;
 import android.app.FragmentTransaction;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -20,7 +18,6 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -29,19 +26,20 @@ import java.util.logging.Logger;
 
 public class ProjectsList extends Activity {
     //'physical' component variables
-    FrameLayout newProjectFrame; //clicking this should empty out all fields
-    EditText txtProjectTitle, txtTimeCmt, txtDueDate, txtHrsLong, txtMinsLong, txtFrq; //text fields
-    Button saveProjectButton; //will change between Create Project and Update Project
     ImageView projectImageView; //imageview of project we are viewing
+    EditText txtProjectTitle, txtTimeCmt, txtDueDate, txtHrsLong, txtMinsLong, txtFrq; //text fields
+    Button saveProjectButton, clearProjectButton; //buttons
+
 
     String projectImageUri = null; //current project's image path
-    Bitmap myBitmap = null; //supposedly used to create my images from their paths
     private static final Uri DEFAULT_URI = Uri.parse("android.resource://com.google.procrastinatelater/drawable/default_photo"); //default image
 
     //background and non-physical components
-    List<Project> projectsList = new ArrayList<>(); //local list of projects. updated from database's copy.
+    FrameLayout newProjectFrame; //clicking this should empty out all fields
     DatabaseHandler dbHandler;
     ListView projectListView; //my scrolling list of existing projects
+    List<Project> projectsList = new ArrayList<>(); //local list of projects. updated from database's copy.
+
 
 
     @Override
@@ -70,6 +68,7 @@ public class ProjectsList extends Activity {
 
         //identify physical components
         saveProjectButton = (Button) findViewById(R.id.saveProjectButton);  //create save button
+        clearProjectButton = (Button) findViewById(R.id.clearProjectButton); //clear/delete project button
         txtProjectTitle = (EditText) findViewById(R.id.txtProjectTitle);    //project title
         txtTimeCmt = (EditText) findViewById(R.id.txtTimeCmt);              //time commitment
         txtHrsLong = (EditText) findViewById(R.id.txtHrsLong);              //session- # hours long
@@ -201,6 +200,7 @@ public class ProjectsList extends Activity {
             final Project currentProject = projectsList.get(position);
             //project image
             ImageView projectImage = (ImageView) convertView.findViewById(R.id.itemImage);
+            //TODO
             //projectImage.setImageURI(Uri.parse(currentProject.getImgPath()));
             //project title
             TextView projectTitle = (TextView) convertView.findViewById(R.id.titleHere);
@@ -220,24 +220,24 @@ public class ProjectsList extends Activity {
     public void fillFields(Project project){
         if (project == null){
             //set default image
+            projectImageUri = null;
             projectImageView.setImageURI(DEFAULT_URI);
-            //findMyImage(null, projectImageView);
             txtProjectTitle.setText("");
             txtTimeCmt.setText("");
             txtDueDate.setText("");
             txtHrsLong.setText("");
             txtMinsLong.setText("");
             txtFrq.setText("");
-            //set create project button's listener
+            //buttons: Create and Clear
             buttonToCreate();
+            buttonToClear();
 
         }else {
             //set project image
-            Uri imageUri = Uri.parse(project.getImgPath());
-            Logger.getLogger(getClass().getName()).info("Setting projectImageView image to " + imageUri);
             //TODO
-            //unedit after deleting old projects
-            // projectImageView.setImageURI(imageUri);
+            //Uri imageUri = Uri.parse(project.getImgPath());
+            //Logger.getLogger(getClass().getName()).info("Setting projectImageView image to " + imageUri);
+            //projectImageView.setImageURI(imageUri);
             //fill text fields
             txtProjectTitle.setText(project.getName());
             txtTimeCmt.setText(project.getCmt());
@@ -245,8 +245,9 @@ public class ProjectsList extends Activity {
             txtHrsLong.setText(project.getSnHrs());
             txtMinsLong.setText(project.getSnMins());
             txtFrq.setText(project.getSnFrq());
-            //set update button listener
+            //buttons: Update and Delete
             buttonToUpdate(project);
+            buttonToDelete(project);
         }
     }
 
@@ -283,6 +284,7 @@ public class ProjectsList extends Activity {
                         dbHandler.createProject(project);
                         projectsList.add(project);
                         populateList();
+                        fillFields(project);
                         Toast.makeText(getApplicationContext(), title + " " + getString(R.string.project_created), Toast.LENGTH_SHORT).show();
                         Toast.makeText(getApplicationContext(), dbHandler.getProjectCount() + " projects!", Toast.LENGTH_SHORT).show();
                     } else { //message: not enough project info
@@ -291,6 +293,23 @@ public class ProjectsList extends Activity {
                 } else { //message: no title
                     Toast.makeText(getApplicationContext(), getString(R.string.project_no_title), Toast.LENGTH_SHORT).show();
                 }
+            }
+        });
+    }
+
+    private void buttonToClear(){
+        clearProjectButton.setText(getString(R.string.clear_fields));
+        clearProjectButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                projectImageUri = null;
+                projectImageView.setImageURI(DEFAULT_URI);
+                txtProjectTitle.setText("");
+                txtTimeCmt.setText("");
+                txtDueDate.setText("");
+                txtHrsLong.setText("");
+                txtMinsLong.setText("");
+                txtFrq.setText("");
             }
         });
     }
@@ -353,5 +372,31 @@ public class ProjectsList extends Activity {
             }
         });
     }
+
+
+    /**
+     * clear button should say "Delete" and
+     * delete the existing project from the database and the projects scroll
+     */
+    private void buttonToDelete(final Project aProject){
+        clearProjectButton.setText(getString(R.string.delete_project));
+        clearProjectButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dbHandler.deleteProject(aProject);
+                projectsList.remove(aProject);
+                populateList();
+                fillFields(null);
+                Toast.makeText(getApplicationContext(), aProject.getName() + " " + getString(R.string.project_deleted), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+
+
+
+
+
+
 
 }
