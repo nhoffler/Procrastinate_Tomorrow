@@ -3,6 +3,7 @@ package com.google.procrastinatelater;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.provider.CalendarContract;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -94,5 +95,10 @@ public class HomeActivity extends Activity {
     public void goToCalendar(View view) {
         Intent getCalendarScreenIntent = new Intent(this, CalendarActivity.class);
         startActivity(getCalendarScreenIntent);
+
+
+
+
+
     }
 }

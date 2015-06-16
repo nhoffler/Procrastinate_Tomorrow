@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.CalendarContract;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -198,10 +199,21 @@ public class ProjectsList extends Activity {
             }
 
             final Project currentProject = projectsList.get(position);
+
             //project image
             ImageView projectImage = (ImageView) convertView.findViewById(R.id.itemImage);
-            //TODO
-            //projectImage.setImageURI(Uri.parse(currentProject.getImgPath()));
+            //Logger.getLogger(getClass().getName()).info("Setting projectImageView image to " + imageUri);
+            String imgUri = currentProject.getImgPath();
+            if (imgUri != null){
+                projectImage.setImageURI(Uri.parse(imgUri));
+            }else{
+                projectImage.setImageURI(DEFAULT_URI);
+            }
+            if(projectImage.getDrawable() == null){
+                //Logger.getLogger(getClass().getName()).log(Level.WARNING, "setting img url to default");
+                projectImage.setImageURI(DEFAULT_URI);
+            }
+
             //project title
             TextView projectTitle = (TextView) convertView.findViewById(R.id.titleHere);
             projectTitle.setText(currentProject.getName());
@@ -234,10 +246,21 @@ public class ProjectsList extends Activity {
 
         }else {
             //set project image
-            //TODO
-            //Uri imageUri = Uri.parse(project.getImgPath());
-            //Logger.getLogger(getClass().getName()).info("Setting projectImageView image to " + imageUri);
-            //projectImageView.setImageURI(imageUri);
+
+            String imageUri = project.getImgPath();
+            if (imageUri != null) {
+                Logger.getLogger(getClass().getName()).info("Setting projectImageView image to " + imageUri);
+                projectImageView.setImageURI(Uri.parse(imageUri));
+            }else{
+                projectImageView.setImageURI(DEFAULT_URI);
+            }
+
+            if(projectImageView.getDrawable() == null){
+                Logger.getLogger(getClass().getName()).log(Level.WARNING, "setting img url to default");
+                projectImageView.setImageURI(DEFAULT_URI);
+                Toast.makeText(getApplicationContext(), getString(R.string.lost_image), Toast.LENGTH_SHORT).show();
+            }
+
             //fill text fields
             txtProjectTitle.setText(project.getName());
             txtTimeCmt.setText(project.getCmt());
@@ -287,6 +310,9 @@ public class ProjectsList extends Activity {
                         fillFields(project);
                         Toast.makeText(getApplicationContext(), title + " " + getString(R.string.project_created), Toast.LENGTH_SHORT).show();
                         Toast.makeText(getApplicationContext(), dbHandler.getProjectCount() + " projects!", Toast.LENGTH_SHORT).show();
+
+                        startCalendar(project);
+
                     } else { //message: not enough project info
                         Toast.makeText(getApplicationContext(), getString(R.string.project_missing_info), Toast.LENGTH_SHORT).show();
                     }
@@ -359,8 +385,8 @@ public class ProjectsList extends Activity {
                             projectsList.set(projectIndex, aProject);
                         }
                         populateList();
+                        //Toast.makeText(getApplicationContext(), title + " " + getString(R.string.project_updated), Toast.LENGTH_SHORT).show();
 
-                        Toast.makeText(getApplicationContext(), title + " " + getString(R.string.project_updated), Toast.LENGTH_SHORT).show();
                     } else { //message: not enough project info
                         Toast.makeText(getApplicationContext(), getString(R.string.project_missing_info), Toast.LENGTH_SHORT).show();
                     }
@@ -372,7 +398,6 @@ public class ProjectsList extends Activity {
             }
         });
     }
-
 
     /**
      * clear button should say "Delete" and
@@ -391,6 +416,51 @@ public class ProjectsList extends Activity {
             }
         });
     }
+
+
+
+    private void startCalendar(Project aProject){
+        Intent calIntent = new Intent(Intent.ACTION_INSERT);
+        //calIntent.setData(CalendarContract.Events.CONTENT_URI);
+        calIntent.setType("vnd.android.cursor.item/event");
+        calIntent.putExtra(CalendarContract.Events.TITLE, aProject.getName());
+        calIntent.putExtra(CalendarContract.Events.DESCRIPTION, "This is a Procrastinate Later session.");
+        //calIntent.putExtra(CalendarContract.Events.RRULE, "FREQ = WEEKLY; COUNT = 10; WKST = SU; BYDAY = TU,TH");
+
+
+        startActivity(calIntent);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
