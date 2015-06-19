@@ -20,6 +20,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -311,7 +312,7 @@ public class ProjectsList extends Activity {
                         Toast.makeText(getApplicationContext(), title + " " + getString(R.string.project_created), Toast.LENGTH_SHORT).show();
                         Toast.makeText(getApplicationContext(), dbHandler.getProjectCount() + " projects!", Toast.LENGTH_SHORT).show();
 
-                        startCalendar(project);
+                        createEvent(project);
 
                     } else { //message: not enough project info
                         Toast.makeText(getApplicationContext(), getString(R.string.project_missing_info), Toast.LENGTH_SHORT).show();
@@ -419,16 +420,28 @@ public class ProjectsList extends Activity {
 
 
 
-    private void startCalendar(Project aProject){
-        Intent calIntent = new Intent(Intent.ACTION_INSERT);
+    private void createEvent(Project aProject){
+
+        Calendar cal = Calendar.getInstance();
+        Intent intent = new Intent(Intent.ACTION_EDIT);
+        intent.setType("vnd.android.cursor.item/event");
+        intent.putExtra("beginTime", cal.getTimeInMillis());
+        intent.putExtra("allDay", false);
+        intent.putExtra("rrule", "FREQ=YEARLY");
+        intent.putExtra("endTime", cal.getTimeInMillis()+60*60*1000); //one hour
+        intent.putExtra("title", "Test Event");
+        intent.putExtra("description", "This is a sample description");
+        startActivity(intent);
+
+
+
+        /*Intent calIntent = new Intent(Intent.ACTION_INSERT);
         //calIntent.setData(CalendarContract.Events.CONTENT_URI);
         calIntent.setType("vnd.android.cursor.item/event");
         calIntent.putExtra(CalendarContract.Events.TITLE, aProject.getName());
         calIntent.putExtra(CalendarContract.Events.DESCRIPTION, "This is a Procrastinate Later session.");
         //calIntent.putExtra(CalendarContract.Events.RRULE, "FREQ = WEEKLY; COUNT = 10; WKST = SU; BYDAY = TU,TH");
-
-
-        startActivity(calIntent);
+        startActivity(calIntent);*/
     }
 
 
