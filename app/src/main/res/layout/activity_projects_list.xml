@@ -5,23 +5,24 @@
     android:orientation="horizontal">
 
     <LinearLayout
-        android:layout_width="120dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_weight=".2"
         android:orientation="vertical"
         android:id="@+id/scrollLayout">
 
         <FrameLayout
             android:id="@+id/newProjectFrame"
-            android:layout_width="120dp"
-            android:layout_height="120dp"
-            android:background="@color/my_purple">
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/main_color">
 
             <ImageView
                 android:id="@+id/newProjectImage"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_margin="10dp"
-                android:src="@drawable/new_project_img" />
+                android:src="@drawable/new_project_img"/>
         </FrameLayout>
 
         <ListView
@@ -32,8 +33,9 @@
 
     <ScrollView
         android:id="@+id/projectScroll"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight=".8">
 
         <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:id="@+id/existing_layout"
@@ -111,17 +113,10 @@
 
                 <EditText
                     android:id="@+id/txtDueDate"
-                    android:layout_width="wrap_content"
+                    android:layout_width="120dp"
                     android:layout_height="wrap_content"
                     android:ems="10"
                     android:inputType="date" />
-
-                <TextView
-                    android:id="@+id/textView2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="XX"
-                    android:textAppearance="?android:attr/textAppearanceSmall" />
 
             </TableRow>
 
@@ -183,7 +178,7 @@
 
                 <EditText
                     android:id="@+id/txtFrq"
-                    android:layout_width="wrap_content"
+                    android:layout_width="60dp"
                     android:layout_height="wrap_content"
                     android:ems="10"
                     android:inputType="number" />
@@ -195,13 +190,6 @@
                     android:layout_marginLeft="10dp"
                     android:layout_marginRight="10dp"
                     android:text="@string/times_per"
-                    android:textAppearance="?android:attr/textAppearanceSmall" />
-
-                <TextView
-                    android:id="@+id/textView6"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="XX"
                     android:textAppearance="?android:attr/textAppearanceSmall" />
 
             </TableRow>

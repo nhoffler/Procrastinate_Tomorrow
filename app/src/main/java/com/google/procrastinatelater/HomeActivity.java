@@ -8,6 +8,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -15,8 +16,7 @@ import java.util.List;
 
 
 public class HomeActivity extends Activity {
-    Button projectsButton;
-    Button calendarButton;
+    LinearLayout toProjectsLayout, toCalendarLayout;
     TextView projectsMessage;
 
     List<Project> Projects = new ArrayList<>();
@@ -28,8 +28,8 @@ public class HomeActivity extends Activity {
         setContentView(R.layout.activity_home);
 
         //these buttons' onClicks are set in activity_home.xml
-        projectsButton = (Button) findViewById(R.id.projectsButton);
-        calendarButton = (Button) findViewById(R.id.calendarButton);
+        toProjectsLayout = (LinearLayout) findViewById(R.id.toProjectsLayout);
+        toCalendarLayout = (LinearLayout) findViewById(R.id.toCalendarLayout);
         projectsMessage = (TextView) findViewById(R.id.projectsMessage);
 
 

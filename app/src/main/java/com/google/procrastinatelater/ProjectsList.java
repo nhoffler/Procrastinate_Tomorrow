@@ -206,7 +206,8 @@ public class ProjectsList extends Activity {
             //Logger.getLogger(getClass().getName()).info("Setting projectImageView image to " + imageUri);
             String imgUri = currentProject.getImgPath();
             if (imgUri != null){
-                projectImage.setImageURI(Uri.parse(imgUri));
+                //TODO
+                //projectImage.setImageURI(Uri.parse(imgUri));
             }else{
                 projectImage.setImageURI(DEFAULT_URI);
             }
@@ -425,23 +426,22 @@ public class ProjectsList extends Activity {
         Calendar cal = Calendar.getInstance();
         Intent intent = new Intent(Intent.ACTION_EDIT);
         intent.setType("vnd.android.cursor.item/event");
+        intent.putExtra("title", aProject.getName());
         intent.putExtra("beginTime", cal.getTimeInMillis());
         intent.putExtra("allDay", false);
-        intent.putExtra("rrule", "FREQ=YEARLY");
+        intent.putExtra("rrule", "FREQ=WEEKLY");
         intent.putExtra("endTime", cal.getTimeInMillis()+60*60*1000); //one hour
-        intent.putExtra("title", "Test Event");
-        intent.putExtra("description", "This is a sample description");
+        intent.putExtra("description", "This is a Procrastinate Tomorrow session.");
         startActivity(intent);
 
 
 
         /*Intent calIntent = new Intent(Intent.ACTION_INSERT);
-        //calIntent.setData(CalendarContract.Events.CONTENT_URI);
-        calIntent.setType("vnd.android.cursor.item/event");
-        calIntent.putExtra(CalendarContract.Events.TITLE, aProject.getName());
-        calIntent.putExtra(CalendarContract.Events.DESCRIPTION, "This is a Procrastinate Later session.");
-        //calIntent.putExtra(CalendarContract.Events.RRULE, "FREQ = WEEKLY; COUNT = 10; WKST = SU; BYDAY = TU,TH");
-        startActivity(calIntent);*/
+        calIntent.setData(CalendarContract.Events.CONTENT_URI);
+
+        //calIntent.putExtra(CalendarContract.Events.RRULE,
+        "FREQ = WEEKLY; COUNT = 10; WKST = SU; BYDAY = TU,TH");*/
+
     }
 
 

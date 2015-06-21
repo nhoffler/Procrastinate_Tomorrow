@@ -33,7 +33,7 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="5dip"
-            android:textColor="@color/my_plum"
+            android:textColor="@color/main_color"
             android:textSize="18dip"
             android:textStyle="bold" />
 

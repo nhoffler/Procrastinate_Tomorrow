@@ -11,42 +11,86 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:background="@color/main_color">
 
         <TextView android:text="@string/title_message" android:layout_width="match_parent"
-            android:layout_height="55dp"
+            android:layout_height="wrap_content"
             android:paddingTop="25dp"
-            android:textColor="@color/my_plum"
+            android:textColor="@color/neutral_color"
             android:paddingLeft="20dp"
             android:paddingRight="20dp" />
 
-        <Button
-            android:layout_width="wrap_content"
+        <Space
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/manage_projects"
-            android:id="@+id/projectsButton"
-            android:onClick="goToProjects"
             android:layout_gravity="center_horizontal"
-            android:textColor="@color/my_purple"
-            android:layout_marginBottom="10dp"
-            android:layout_marginTop="50dp"
-            android:paddingLeft="5dp"
-            android:paddingRight="5dp" />
+            android:layout_weight="1"/>
 
-        <Button
+        <LinearLayout
+            android:orientation="horizontal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/view_calendar"
-            android:id="@+id/calendarButton"
-            android:onClick="goToCalendar"
             android:layout_gravity="center_horizontal"
-            android:textColor="@color/my_purple" />
+            android:id="@+id/toProjectsLayout"
+            android:onClick="goToProjects">
+
+            <ImageView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:id="@+id/to_projects_Img"
+                android:src="@drawable/projects_img"
+                android:padding="5dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="@string/manage_projects"
+                android:id="@+id/textView7"
+                android:gravity="center_vertical"
+                android:textColor="@color/neutral_color"
+                android:layout_gravity="center_vertical"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:id="@+id/toCalendarLayout"
+            android:onClick="goToCalendar">
+
+            <ImageView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:id="@+id/to_calendar_image"
+                android:src="@drawable/calendar_img"
+                android:padding="8dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="@string/view_calendar"
+                android:id="@+id/textView8"
+                android:gravity="center_vertical"
+                android:textColor="@color/neutral_color"
+                android:layout_gravity="center_vertical"/>
+
+        </LinearLayout>
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_weight=".5"/>
+
     </LinearLayout>
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/my_plum">
+        android:layout_height="match_parent">
 
         <TextView
             android:layout_width="wrap_content"
@@ -54,7 +98,7 @@
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:text="@string/no_sessions"
             android:id="@+id/projectsMessage"
-            android:textColor="#fff7f7f7"
+            android:textColor="@color/contrasting_color"
             android:layout_gravity="center_horizontal|top"
             android:paddingTop="35dp" />
     </FrameLayout>

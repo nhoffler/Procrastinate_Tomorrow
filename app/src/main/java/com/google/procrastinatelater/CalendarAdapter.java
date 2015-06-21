@@ -50,8 +50,8 @@ public class CalendarAdapter extends BaseAdapter {
         selectedDate = (GregorianCalendar) monthCalendar.clone();
 
         mContext = c;
-        my_plum = mContext.getResources().getColor(R.color.my_plum);
-        my_teal = mContext.getResources().getColor(R.color.my_teal);
+        my_plum = mContext.getResources().getColor(R.color.contrasting_color);
+        my_teal = mContext.getResources().getColor(R.color.main_color);
 
         month.set(GregorianCalendar.DAY_OF_MONTH, 1);
         this.items = new ArrayList<String>();

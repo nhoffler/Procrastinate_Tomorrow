@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="my_teal"> #26D670 </color>
-    <color name="my_purple"> #B872B9 </color>
-    <color name="my_plum"> #6B036B </color>
+    <color name="main_color"> #486A5A </color>
+    <color name="neutral_color"> #FFFFFF</color>
+    <color name="contrasting_color"> #B37B95 </color>
 </resources>
