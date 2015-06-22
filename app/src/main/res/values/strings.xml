@@ -21,7 +21,7 @@
 
     <string name="hours">hours</string>
     <string name="minutes">minutes</string>
-    <string name="times_per">times per</string>
+    <string name="times_per">times per week</string>
 
 
     <string name="project_created"> has been added to your projects!</string>

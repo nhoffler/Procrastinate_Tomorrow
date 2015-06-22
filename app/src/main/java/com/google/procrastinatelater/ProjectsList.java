@@ -422,26 +422,99 @@ public class ProjectsList extends Activity {
 
 
     private void createEvent(Project aProject){
-
         Calendar cal = Calendar.getInstance();
         Intent intent = new Intent(Intent.ACTION_EDIT);
         intent.setType("vnd.android.cursor.item/event");
         intent.putExtra("title", aProject.getName());
-        intent.putExtra("beginTime", cal.getTimeInMillis());
-        intent.putExtra("allDay", false);
-        intent.putExtra("rrule", "FREQ=WEEKLY");
-        intent.putExtra("endTime", cal.getTimeInMillis()+60*60*1000); //one hour
         intent.putExtra("description", "This is a Procrastinate Tomorrow session.");
+        intent.putExtra("allDay", false);
+        intent.putExtra("beginTime", cal.getTimeInMillis());
+
+        String strCmt = aProject.getCmt();
+        String due = aProject.getDueDate();
+        String strHrs = aProject.getSnHrs();
+        String strMins = aProject.getSnMins();
+        String strFrq = aProject.getSnFrq();
+        //make ints for mathematical values
+        /*int cmt = Integer.parseInt(strCmt);
+        int hrs = Integer.parseInt(strHrs);
+        int mins = Integer.parseInt(strMins);
+        int frq = Integer.parseInt(strFrq);*/
+        //boolean is true when the field has been filled. using trim() to take out empty spaces.
+        boolean b_cmt = !strCmt.trim().isEmpty();
+        boolean b_due = !due.trim().isEmpty();
+        boolean b_howLong = !(strHrs.trim().isEmpty() && strMins.trim().isEmpty());
+        boolean b_frq = !strFrq.trim().isEmpty();
+
+        if (!b_cmt && !b_due && b_howLong && b_frq){ //if we know only session frequency and length
+            intent.putExtra("endTime", cal.getTimeInMillis()+putSessionLength(strHrs, strMins));
+            intent.putExtra("rrule", putSessionFrequency(strFrq));
+        }else if (!b_cmt && b_due && b_howLong && b_frq){ //we know session frequency and length, and when the project is due
+            intent.putExtra("endTime", cal.getTimeInMillis()+putSessionLength(strHrs, strMins));
+            intent.putExtra("rrule", putSessionFrequency(strFrq));
+            //intent.putExtra("lastDate", )
+        }
+
+
+        /*intent.putExtra("beginTime", cal.getTimeInMillis());
+        intent.putExtra("rrule", "FREQ=WEEKLY");
+        intent.putExtra("endTime", cal.getTimeInMillis()+60*60*1000); //one hour*/
+
         startActivity(intent);
 
 
 
         /*Intent calIntent = new Intent(Intent.ACTION_INSERT);
         calIntent.setData(CalendarContract.Events.CONTENT_URI);
-
         //calIntent.putExtra(CalendarContract.Events.RRULE,
         "FREQ = WEEKLY; COUNT = 10; WKST = SU; BYDAY = TU,TH");*/
 
+    }
+
+    private int putSessionLength(String aStrHrs, String aStrMins){
+        int hrs = 0;
+        int mins = 0;
+        if (!aStrHrs.trim().isEmpty()){
+            hrs = Integer.parseInt(aStrHrs);
+        }
+        if (!aStrMins.trim().isEmpty()){
+            mins = Integer.parseInt(aStrMins);
+        }
+        hrs = hrs*1000*60*60;
+        mins = mins*1000*60;
+        return hrs+mins;
+    }
+
+    private String putSessionFrequency(String aStrFrq){
+        String frqParam;
+        int frq = Integer.parseInt(aStrFrq);
+        switch (frq){
+            case 1:
+                frqParam = "FREQ=WEEKLY";
+                break;
+            case 2:
+                frqParam = "FREQ=WEEKLY;BYDAY=MO,TU";
+                break;
+            case 3:
+                frqParam = "FREQ=WEEKLY;BYDAY=MO,TU,WE";
+                break;
+            case 4:
+                frqParam = "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH";
+                break;
+            case 5:
+                frqParam = "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FRI";
+                break;
+            case 6:
+                frqParam = "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR,SA";
+                break;
+            case 7:
+                frqParam = "FREQ=DAILY";
+                break;
+            default:
+                frqParam = "FREQ=DAILY";
+                break;
+        }
+        return frqParam;
     }
 
 
