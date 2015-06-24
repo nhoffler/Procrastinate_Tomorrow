@@ -113,7 +113,7 @@
 
                 <EditText
                     android:id="@+id/txtDueDate"
-                    android:layout_width="120dp"
+                    android:layout_width="200dp"
                     android:layout_height="wrap_content"
                     android:ems="10"
                     android:inputType="date" />

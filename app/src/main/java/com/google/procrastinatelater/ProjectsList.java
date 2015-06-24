@@ -19,9 +19,14 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -311,7 +316,7 @@ public class ProjectsList extends Activity {
                         populateList();
                         fillFields(project);
                         Toast.makeText(getApplicationContext(), title + " " + getString(R.string.project_created), Toast.LENGTH_SHORT).show();
-                        Toast.makeText(getApplicationContext(), dbHandler.getProjectCount() + " projects!", Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(getApplicationContext(), dbHandler.getProjectCount() + " projects!", Toast.LENGTH_SHORT).show();
 
                         createEvent(project);
 
@@ -451,7 +456,17 @@ public class ProjectsList extends Activity {
             intent.putExtra("rrule", putSessionFrequency(strFrq));
         }else if (!b_cmt && b_due && b_howLong && b_frq){ //we know session frequency and length, and when the project is due
             intent.putExtra("endTime", cal.getTimeInMillis()+putSessionLength(strHrs, strMins));
-            intent.putExtra("rrule", putSessionFrequency(strFrq));
+
+            //TODO
+            String untilDate = putEndDate(aProject.getDueDate());
+            if (untilDate != null){
+                //Toast.makeText(getApplicationContext(), "Until " + untilDate, Toast.LENGTH_SHORT).show();
+                intent.putExtra("rrule", putSessionFrequency(strFrq)+";UNTIL="+untilDate);
+            }else{
+                intent.putExtra("rrule", putSessionFrequency(strFrq));
+            }
+
+
             //intent.putExtra("lastDate", )
         }
 
@@ -459,17 +474,51 @@ public class ProjectsList extends Activity {
         /*intent.putExtra("beginTime", cal.getTimeInMillis());
         intent.putExtra("rrule", "FREQ=WEEKLY");
         intent.putExtra("endTime", cal.getTimeInMillis()+60*60*1000); //one hour*/
-
-        startActivity(intent);
-
-
-
         /*Intent calIntent = new Intent(Intent.ACTION_INSERT);
         calIntent.setData(CalendarContract.Events.CONTENT_URI);
         //calIntent.putExtra(CalendarContract.Events.RRULE,
         "FREQ = WEEKLY; COUNT = 10; WKST = SU; BYDAY = TU,TH");*/
 
+        startActivity(intent);
     }
+
+
+    private String putEndDate(String dateString){
+        String rfcDate;
+        SimpleDateFormat formatIn = new SimpleDateFormat("MMMM dd, yyyy", Locale.US);
+        SimpleDateFormat formatOut = new SimpleDateFormat("MM/dd/yyyy", Locale.US);
+        Date projectDate = null;
+
+        try {
+            projectDate = formatIn.parse(dateString.toLowerCase()); //use format to parse parameter into Date projectDate
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(projectDate);
+            int year = cal.get(Calendar.YEAR);
+            int month = cal.get(Calendar.MONTH)+1; //months start at 0 instead of 1
+            int day = cal.get(Calendar.DAY_OF_MONTH);
+            //int[] dateArray = new int[]{year, month+1, day};  //months start at 0 instead of 1!
+
+            rfcDate = String.valueOf(year);
+            if (month < 10){
+                rfcDate += "0"; //the month should be two digits. ex: 01-12
+            }
+            rfcDate += month;
+            if (day < 10){
+                rfcDate += "0"; //the day should be two digits. ex: 01-12
+            }
+            rfcDate += day;
+            rfcDate += "T235959"; //midnight.
+
+        } catch (ParseException e) {
+            Toast.makeText(getApplicationContext(), "We were unable use your due date", Toast.LENGTH_SHORT).show();
+            Logger.getLogger(getClass().getName()).log(Level.WARNING, "could not parse due date");
+            //e.printStackTrace();
+            rfcDate = null;
+        }
+
+        return rfcDate;
+    }
+
 
     private int putSessionLength(String aStrHrs, String aStrMins){
         int hrs = 0;

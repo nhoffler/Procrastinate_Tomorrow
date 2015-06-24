@@ -13,10 +13,10 @@
     <string name="opt_lng">Session Length</string>
     <string name="opt_frq">Session Frequency</string>
 
-    <string name="create_project">Create Project</string>
-    <string name="update_project">Update Project</string>
+    <string name="create_project">Create</string>
+    <string name="update_project">Update</string>
     <string name="clear_fields">Clear</string>
-    <string name="delete_project">Delete Project</string>
+    <string name="delete_project">Delete</string>
 
 
     <string name="hours">hours</string>
