@@ -440,11 +440,6 @@ public class ProjectsList extends Activity {
         String strHrs = aProject.getSnHrs();
         String strMins = aProject.getSnMins();
         String strFrq = aProject.getSnFrq();
-        //make ints for mathematical values
-        /*int cmt = Integer.parseInt(strCmt);
-        int hrs = Integer.parseInt(strHrs);
-        int mins = Integer.parseInt(strMins);
-        int frq = Integer.parseInt(strFrq);*/
         //boolean is true when the field has been filled. using trim() to take out empty spaces.
         boolean b_cmt = !strCmt.trim().isEmpty();
         boolean b_due = !due.trim().isEmpty();
@@ -452,32 +447,56 @@ public class ProjectsList extends Activity {
         boolean b_frq = !strFrq.trim().isEmpty();
 
         if (!b_cmt && !b_due && b_howLong && b_frq){ //if we know only session frequency and length
+
             intent.putExtra("endTime", cal.getTimeInMillis()+putSessionLength(strHrs, strMins));
-            intent.putExtra("rrule", putSessionFrequency(strFrq));
+            intent.putExtra("rrule", "FREQ=" + putSessionFrequency(strFrq));
+
         }else if (!b_cmt && b_due && b_howLong && b_frq){ //we know session frequency and length, and when the project is due
+
             intent.putExtra("endTime", cal.getTimeInMillis()+putSessionLength(strHrs, strMins));
             //if we can read the due date, repeat at frequency desired until then. Otherwise, repeat forever.
             String untilDate = putEndDate(aProject.getDueDate());
             if (untilDate != null){
                 //Toast.makeText(getApplicationContext(), "Until " + untilDate, Toast.LENGTH_SHORT).show();
-                intent.putExtra("rrule", putSessionFrequency(strFrq)+";UNTIL="+untilDate);
+                intent.putExtra("rrule", "FREQ=" + putSessionFrequency(strFrq) + ";UNTIL=" + untilDate);
             }else{
-                intent.putExtra("rrule", putSessionFrequency(strFrq));
+                //a note will be 'Toasted' through putEndDate if we couldn't read the end date
+                intent.putExtra("rrule", "FREQ=" + putSessionFrequency(strFrq));
             }
-        }else{
-            //TODO
+
+        }else if (b_cmt && !b_due && b_howLong && b_frq){
+
+            float sessionInMs = putSessionLength(strHrs, strMins);
+            float projectCmt = Float.parseFloat(strCmt);
+
+            intent.putExtra("endTime", cal.getTimeInMillis() +
+                    putSessionLength(strHrs, strMins)); //not using float sessionInMs because of calendar bug
+            intent.putExtra("rrule", "FREQ=" + putSessionFrequency(strFrq) +
+                    ";COUNT=" + putCountFromCmt(projectCmt, sessionInMs));
+
         }
 
+        //TODO
 
-        /*intent.putExtra("beginTime", cal.getTimeInMillis());
-        intent.putExtra("rrule", "FREQ=WEEKLY");
-        intent.putExtra("endTime", cal.getTimeInMillis()+60*60*1000); //one hour*/
-        /*Intent calIntent = new Intent(Intent.ACTION_INSERT);
-        calIntent.setData(CalendarContract.Events.CONTENT_URI);
-        //calIntent.putExtra(CalendarContract.Events.RRULE,
-        "FREQ = WEEKLY; COUNT = 10; WKST = SU; BYDAY = TU,TH");*/
+
+        //calIntent.setData(CalendarContract.Events.CONTENT_URI);
+
 
         startActivity(intent);
+    }
+
+    /**
+     *
+     * @param aCmt time needed to complete project; its time commitment
+     * @param aSessionInMs length of sessions IN MILLISECONDS
+     * @return
+     */
+    private int putCountFromCmt(float aCmt, float aSessionInMs){
+        float sessionInHrs = aSessionInMs/(1000*60*60); //calculate session in hours
+        int numSessions = (int)Math.ceil(aCmt/sessionInHrs); //total time divided by session length = number of session needed
+        //Toast.makeText(getApplicationContext(), "" + aCmt + "/" + sessionInHrs + "= " + (hrsTotal/sessionInHrs) , Toast.LENGTH_SHORT).show();
+        Toast.makeText(getApplicationContext(), "numSessions" + numSessions, Toast.LENGTH_SHORT).show();
+        return numSessions;
     }
 
 
@@ -537,28 +556,28 @@ public class ProjectsList extends Activity {
         int frq = Integer.parseInt(aStrFrq);
         switch (frq){
             case 1:
-                frqParam = "FREQ=WEEKLY";
+                frqParam = "WEEKLY";
                 break;
             case 2:
-                frqParam = "FREQ=WEEKLY;BYDAY=MO,TU";
+                frqParam = "WEEKLY;BYDAY=MO,TU";
                 break;
             case 3:
-                frqParam = "FREQ=WEEKLY;BYDAY=MO,TU,WE";
+                frqParam = "WEEKLY;BYDAY=MO,TU,WE";
                 break;
             case 4:
-                frqParam = "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH";
+                frqParam = "WEEKLY;BYDAY=MO,TU,WE,TH";
                 break;
             case 5:
-                frqParam = "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FRI";
+                frqParam = "WEEKLY;BYDAY=MO,TU,WE,TH,FRI";
                 break;
             case 6:
-                frqParam = "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR,SA";
+                frqParam = "WEEKLY;BYDAY=MO,TU,WE,TH,FR,SA";
                 break;
             case 7:
-                frqParam = "FREQ=DAILY";
+                frqParam = "DAILY";
                 break;
             default:
-                frqParam = "FREQ=DAILY";
+                frqParam = "DAILY";
                 break;
         }
         return frqParam;
