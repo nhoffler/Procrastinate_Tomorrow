@@ -58,22 +58,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginBottom="15dp"
                 android:elegantTextHeight="false"
-                android:hint="@string/project_title" />
-
-            <fragment
-                android:id="@+id/fragment_existing_projectProject"
-                android:name="com.google.procrastinatelater.FragmentExistingProject"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                tools:layout="@layout/fragment_progress" />
+                android:hint="@string/project_title"
+                android:layout_marginBottom="15dp"/>
 
             <TextView
                 android:id="@+id/textViewCmt"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
                 android:text="@string/opt_cmt"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
 
