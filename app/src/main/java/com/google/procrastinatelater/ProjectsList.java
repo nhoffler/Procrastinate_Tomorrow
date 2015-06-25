@@ -456,8 +456,7 @@ public class ProjectsList extends Activity {
             intent.putExtra("rrule", putSessionFrequency(strFrq));
         }else if (!b_cmt && b_due && b_howLong && b_frq){ //we know session frequency and length, and when the project is due
             intent.putExtra("endTime", cal.getTimeInMillis()+putSessionLength(strHrs, strMins));
-
-            //TODO
+            //if we can read the due date, repeat at frequency desired until then. Otherwise, repeat forever.
             String untilDate = putEndDate(aProject.getDueDate());
             if (untilDate != null){
                 //Toast.makeText(getApplicationContext(), "Until " + untilDate, Toast.LENGTH_SHORT).show();
@@ -465,9 +464,8 @@ public class ProjectsList extends Activity {
             }else{
                 intent.putExtra("rrule", putSessionFrequency(strFrq));
             }
-
-
-            //intent.putExtra("lastDate", )
+        }else{
+            //TODO
         }
 
 

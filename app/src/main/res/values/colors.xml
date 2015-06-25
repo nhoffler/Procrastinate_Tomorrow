@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="main_color"> #486A5A </color>
+    <color name="main_color"> #16A085 </color>
     <color name="neutral_color"> #FFFFFF</color>
-    <color name="contrasting_color"> #B37B95 </color>
+    <color name="contrasting_color"> #B82E8A </color>
 </resources>
