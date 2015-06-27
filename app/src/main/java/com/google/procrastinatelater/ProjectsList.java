@@ -451,11 +451,12 @@ public class ProjectsList extends Activity {
             intent.putExtra("endTime", cal.getTimeInMillis()+putSessionLength(strHrs, strMins));
             intent.putExtra("rrule", "FREQ=" + putSessionFrequency(strFrq));
 
+
         }else if (!b_cmt && b_due && b_howLong && b_frq){ //we know session frequency and length, and when the project is due
 
             intent.putExtra("endTime", cal.getTimeInMillis()+putSessionLength(strHrs, strMins));
             //if we can read the due date, repeat at frequency desired until then. Otherwise, repeat forever.
-            String untilDate = putEndDate(aProject.getDueDate());
+            String untilDate = putEndDate(stringToCalendar(aProject.getDueDate()));
             if (untilDate != null){
                 //Toast.makeText(getApplicationContext(), "Until " + untilDate, Toast.LENGTH_SHORT).show();
                 intent.putExtra("rrule", "FREQ=" + putSessionFrequency(strFrq) + ";UNTIL=" + untilDate);
@@ -464,7 +465,8 @@ public class ProjectsList extends Activity {
                 intent.putExtra("rrule", "FREQ=" + putSessionFrequency(strFrq));
             }
 
-        }else if (b_cmt && !b_due && b_howLong && b_frq){
+
+        }else if (b_cmt && !b_due && b_howLong && b_frq){ //we know time commitment, and session length and frequency
 
             float sessionInMs = putSessionLength(strHrs, strMins);
             float projectCmt = Float.parseFloat(strCmt);
@@ -474,16 +476,75 @@ public class ProjectsList extends Activity {
             intent.putExtra("rrule", "FREQ=" + putSessionFrequency(strFrq) +
                     ";COUNT=" + putCountFromCmt(projectCmt, sessionInMs));
 
+
+        }else if (b_cmt && b_due && !b_howLong && b_frq){   //we know time commitment, the due date, and session frequency
+
+            Calendar endCalendar = stringToCalendar(aProject.getDueDate());
+
+            //if we can read the due date, repeat at frequency desired until then. Otherwise, repeat forever.
+            String untilDate = putEndDate(endCalendar);
+            if (untilDate != null){
+                //Toast.makeText(getApplicationContext(), "Until " + untilDate, Toast.LENGTH_SHORT).show();
+                intent.putExtra("rrule", "FREQ=" + putSessionFrequency(strFrq) + ";UNTIL=" + untilDate);
+            }else{
+                //a note will be 'Toasted' through putEndDate if we couldn't read the end date
+                intent.putExtra("rrule", "FREQ=" + putSessionFrequency(strFrq));
+            }
+
+            //put session length
+            intent.putExtra("endTime", cal.getTimeInMillis() + putLengthFromCmt(strCmt, strFrq, cal, endCalendar));
+
+
+        }else if (b_cmt && b_due && b_howLong && !b_frq){
+
+            //int numSessionsNeeded =
+
+        }else if (b_cmt && b_due && b_howLong && b_frq){
+
         }
 
-        //TODO
-        //three more.
+
 
 
         //calIntent.setData(CalendarContract.Events.CONTENT_URI);
 
 
         startActivity(intent);
+    }
+
+    private int putLengthFromCmt(String aCmt, String aFrq, Calendar aStart, Calendar anEnd){
+        //divide the time commitment by the number of sessions between now and the due date
+
+        //step one: find number of sessions
+        int numSessions = 0;
+        int dayOfWeekToday = aStart.get(Calendar.DAY_OF_WEEK);
+
+        for (Calendar loopCal = aStart; loopCal.before(anEnd); loopCal.add(Calendar.DATE, 1)) {
+
+            int sessionFrq = Integer.parseInt(aFrq); //how often user has chosen to work per week
+            if (sessionFrq == 1){ //if weekly sessions, beginning today:
+                if (loopCal.get(Calendar.DAY_OF_WEEK) == dayOfWeekToday){ //if this day is the same day of the week as today
+                    numSessions++;
+                }
+            }else if (sessionFrq >= 7){ //daily sessions, count every day
+                numSessions++;
+            }else{ //depends on what days user has sessions
+                //Calendar.MONDAY == 2 and Calendar.SATURDAY == 7
+                //sessionFrq 2 == Monday(2) thru Tuesday(3)
+                //sesisonFrq 6 == Monday(2) thru Saturday(7)
+                if (loopCal.get(Calendar.DAY_OF_WEEK) >= 2 && loopCal.get(Calendar.DAY_OF_WEEK) <= (sessionFrq+1) ){ //if this day falls on a session day, Monday through XXX
+                    numSessions++;
+                }
+            }
+        }
+        Toast.makeText(getApplicationContext(), "numSessions" + numSessions, Toast.LENGTH_SHORT).show();
+
+        //step two: divide cmt into number of sessions to find time per session
+        Float sessionLengthInHrs = (Float.parseFloat(aCmt)/numSessions);
+        Toast.makeText(getApplicationContext(), "Session Length: " + sessionLengthInHrs, Toast.LENGTH_SHORT).show();
+        int sessionLengthInMs = (int)(1000*60*60*sessionLengthInHrs);
+
+        return sessionLengthInMs;
     }
 
     /**
@@ -500,39 +561,46 @@ public class ProjectsList extends Activity {
         return numSessions;
     }
 
-
-    private String putEndDate(String dateString){
-        String rfcDate;
+    private Calendar stringToCalendar(String aDateString){
+        Calendar endCal = Calendar.getInstance();
         SimpleDateFormat formatIn = new SimpleDateFormat("MMMM dd, yyyy", Locale.US);
-        SimpleDateFormat formatOut = new SimpleDateFormat("MM/dd/yyyy", Locale.US);
-        Date projectDate = null;
 
         try {
-            projectDate = formatIn.parse(dateString.toLowerCase()); //use format to parse parameter into Date projectDate
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(projectDate);
-            int year = cal.get(Calendar.YEAR);
-            int month = cal.get(Calendar.MONTH)+1; //months start at 0 instead of 1
-            int day = cal.get(Calendar.DAY_OF_MONTH);
-            //int[] dateArray = new int[]{year, month+1, day};  //months start at 0 instead of 1!
 
-            rfcDate = String.valueOf(year);
-            if (month < 10){
-                rfcDate += "0"; //the month should be two digits. ex: 01-12
-            }
-            rfcDate += month;
-            if (day < 10){
-                rfcDate += "0"; //the day should be two digits. ex: 01-12
-            }
-            rfcDate += day;
-            rfcDate += "T235959"; //midnight.
-
+            Date projectDate = formatIn.parse(aDateString.toLowerCase()); //use format to parse parameter into Date projectDate
+            endCal.setTime(projectDate);
         } catch (ParseException e) {
             Toast.makeText(getApplicationContext(), "We were unable use your due date", Toast.LENGTH_SHORT).show();
             Logger.getLogger(getClass().getName()).log(Level.WARNING, "could not parse due date");
             //e.printStackTrace();
-            rfcDate = null;
+            return null;
         }
+
+        return endCal;
+    }
+
+    private String putEndDate(Calendar anEndCal){
+
+        if (anEndCal == null){
+            return null;
+        }
+
+        String rfcDate;
+        int year = anEndCal.get(Calendar.YEAR);
+        int month = anEndCal.get(Calendar.MONTH)+1; //months start at 0 instead of 1
+        int day = anEndCal.get(Calendar.DAY_OF_MONTH);
+        //int[] dateArray = new int[]{year, month+1, day};  //months start at 0 instead of 1!
+
+        rfcDate = String.valueOf(year);
+        if (month < 10){
+            rfcDate += "0"; //the month should be two digits. ex: 01-12
+        }
+        rfcDate += month;
+        if (day < 10){
+            rfcDate += "0"; //the day should be two digits. ex: 01-12
+        }
+        rfcDate += day;
+        rfcDate += "T235959"; //midnight.
 
         return rfcDate;
     }
@@ -573,9 +641,6 @@ public class ProjectsList extends Activity {
                 break;
             case 6:
                 frqParam = "WEEKLY;BYDAY=MO,TU,WE,TH,FR,SA";
-                break;
-            case 7:
-                frqParam = "DAILY";
                 break;
             default:
                 frqParam = "DAILY";
