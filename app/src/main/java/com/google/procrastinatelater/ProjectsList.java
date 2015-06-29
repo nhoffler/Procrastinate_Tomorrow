@@ -436,13 +436,13 @@ public class ProjectsList extends Activity {
         intent.putExtra("beginTime", cal.getTimeInMillis());
 
         String strCmt = aProject.getCmt();
-        String due = aProject.getDueDate();
+        String strDue = aProject.getDueDate();
         String strHrs = aProject.getSnHrs();
         String strMins = aProject.getSnMins();
         String strFrq = aProject.getSnFrq();
         //boolean is true when the field has been filled. using trim() to take out empty spaces.
         boolean b_cmt = !strCmt.trim().isEmpty();
-        boolean b_due = !due.trim().isEmpty();
+        boolean b_due = !strDue.trim().isEmpty();
         boolean b_howLong = !(strHrs.trim().isEmpty() && strMins.trim().isEmpty());
         boolean b_frq = !strFrq.trim().isEmpty();
 
@@ -456,7 +456,7 @@ public class ProjectsList extends Activity {
 
             intent.putExtra("endTime", cal.getTimeInMillis()+putSessionLength(strHrs, strMins));
             //if we can read the due date, repeat at frequency desired until then. Otherwise, repeat forever.
-            String untilDate = putEndDate(stringToCalendar(aProject.getDueDate()));
+            String untilDate = putEndDate(stringToCalendar(strDue));
             if (untilDate != null){
                 //Toast.makeText(getApplicationContext(), "Until " + untilDate, Toast.LENGTH_SHORT).show();
                 intent.putExtra("rrule", "FREQ=" + putSessionFrequency(strFrq) + ";UNTIL=" + untilDate);
@@ -479,7 +479,7 @@ public class ProjectsList extends Activity {
 
         }else if (b_cmt && b_due && !b_howLong && b_frq){   //we know time commitment, the due date, and session frequency
 
-            Calendar endCalendar = stringToCalendar(aProject.getDueDate());
+            Calendar endCalendar = stringToCalendar(strDue);
 
             //if we can read the due date, repeat at frequency desired until then. Otherwise, repeat forever.
             String untilDate = putEndDate(endCalendar);
@@ -498,7 +498,7 @@ public class ProjectsList extends Activity {
         }else if (b_cmt && b_due && b_howLong && !b_frq){ //we know time commitment, the due date, and session length
 
             int sessionInMs = putSessionLength(strHrs, strMins);
-            Calendar endCalendar = stringToCalendar(aProject.getDueDate());
+            Calendar endCalendar = stringToCalendar(strDue);
             String untilDate = putEndDate(endCalendar);
             String sessionFrq = putFrqFromCmt(strCmt, sessionInMs, cal, endCalendar);
 
@@ -517,23 +517,31 @@ public class ProjectsList extends Activity {
 
         }else if (b_cmt && b_due && b_howLong && b_frq){
 
-            /*//fill in event as if we do not know the due date
-            float sessionInMs = putSessionLength(strHrs, strMins);
+            //fill in due date, session length, and session frequency
+
+            int sessionInMs = putSessionLength(strHrs, strMins);
             float projectCmt = Float.parseFloat(strCmt);
+            Calendar endCalendar = stringToCalendar(strDue);
+            String untilDate = putEndDate(endCalendar);
 
-            intent.putExtra("endTime", cal.getTimeInMillis() +
-                    putSessionLength(strHrs, strMins)); //not using float sessionInMs because of calendar bug
-            intent.putExtra("rrule", "FREQ=" + putSessionFrequency(strFrq) +
-                    ";COUNT=" + putCountFromCmt(projectCmt, sessionInMs));
+            intent.putExtra("endTime", cal.getTimeInMillis() + putSessionLength(strHrs, strMins)); //not using float sessionInMs because of calendar bug
 
-            //check due date*/
+            //if we can read the due date, repeat at frequency desired until then. Otherwise, repeat forever.
+            if (untilDate != null){
+                //Toast.makeText(getApplicationContext(), "Until " + untilDate, Toast.LENGTH_SHORT).show();
+                intent.putExtra("rrule", "FREQ=" + putSessionFrequency(strFrq) + ";COUNT=" + putCountFromCmt(projectCmt, sessionInMs) + ";UNTIL=" + untilDate);
+            }else{
+                //a note will be 'Toasted' through putEndDate if we couldn't read the end date
+                intent.putExtra("rrule", "FREQ=" + putSessionFrequency(strFrq)+ ";COUNT=" + putCountFromCmt(projectCmt, sessionInMs));
+            }
+
+            //check due date.
+            int tentativeFrq = Integer.parseInt(putFrqFromCmt(strCmt, sessionInMs, cal, endCalendar));
+            if (tentativeFrq > Integer.parseInt(strFrq)){
+                Toast.makeText(getApplicationContext(), "Warning: Given these criteria, you will not finish this project on time." , Toast.LENGTH_LONG).show();
+            }
+
         }
-
-
-
-
-        //calIntent.setData(CalendarContract.Events.CONTENT_URI);
-
 
         startActivity(intent);
     }
@@ -543,9 +551,9 @@ public class ProjectsList extends Activity {
         String projectFrq;
         float projectCmt = Float.parseFloat(aCmt);
         float sessionInHrs = (float)aSessionInMs/(1000*60*60);
-        Toast.makeText(getApplicationContext(), "Length in Hrs: " + sessionInHrs, Toast.LENGTH_SHORT).show();
+        //Toast.makeText(getApplicationContext(), "Length in Hrs: " + sessionInHrs, Toast.LENGTH_SHORT).show();
         int numSessions = (int)Math.ceil(projectCmt/sessionInHrs);
-        Toast.makeText(getApplicationContext(), "Number of Session Needed: " + numSessions, Toast.LENGTH_SHORT).show();
+        //Toast.makeText(getApplicationContext(), "Number of Session Needed: " + numSessions, Toast.LENGTH_SHORT).show();
 
 
         int[] numDays = new int[7]; //represents the number of each day of the week, Sundays (0) through Saturdays (6)
@@ -607,11 +615,11 @@ public class ProjectsList extends Activity {
                 }
             }
         }
-        Toast.makeText(getApplicationContext(), "numSessions" + numSessions, Toast.LENGTH_SHORT).show();
+        //Toast.makeText(getApplicationContext(), "numSessions" + numSessions, Toast.LENGTH_SHORT).show();
 
         //step two: divide cmt into number of sessions to find time per session
         Float sessionLengthInHrs = (Float.parseFloat(aCmt)/numSessions);
-        Toast.makeText(getApplicationContext(), "Session Length: " + sessionLengthInHrs, Toast.LENGTH_SHORT).show();
+        //Toast.makeText(getApplicationContext(), "Session Length: " + sessionLengthInHrs, Toast.LENGTH_SHORT).show();
         int sessionLengthInMs = (int)(1000*60*60*sessionLengthInHrs);
 
         return sessionLengthInMs;
@@ -627,7 +635,7 @@ public class ProjectsList extends Activity {
         float sessionInHrs = aSessionInMs/(1000*60*60); //calculate session in hours
         int numSessions = (int)Math.ceil(aCmt/sessionInHrs); //total time divided by session length = number of session needed
         //Toast.makeText(getApplicationContext(), "" + aCmt + "/" + sessionInHrs + "= " + (hrsTotal/sessionInHrs) , Toast.LENGTH_SHORT).show();
-        Toast.makeText(getApplicationContext(), "numSessions" + numSessions, Toast.LENGTH_SHORT).show();
+        //Toast.makeText(getApplicationContext(), "numSessions" + numSessions, Toast.LENGTH_SHORT).show();
         return numSessions;
     }
 
