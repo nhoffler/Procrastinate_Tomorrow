@@ -495,12 +495,38 @@ public class ProjectsList extends Activity {
             intent.putExtra("endTime", cal.getTimeInMillis() + putLengthFromCmt(strCmt, strFrq, cal, endCalendar));
 
 
-        }else if (b_cmt && b_due && b_howLong && !b_frq){
+        }else if (b_cmt && b_due && b_howLong && !b_frq){ //we know time commitment, the due date, and session length
 
-            //int numSessionsNeeded =
+            int sessionInMs = putSessionLength(strHrs, strMins);
+            Calendar endCalendar = stringToCalendar(aProject.getDueDate());
+            String untilDate = putEndDate(endCalendar);
+            String sessionFrq = putFrqFromCmt(strCmt, sessionInMs, cal, endCalendar);
+
+            //if we can read the due date, repeat at frequency desired until then. Otherwise, repeat forever.
+            if (untilDate != null){
+                //Toast.makeText(getApplicationContext(), "Until " + untilDate, Toast.LENGTH_SHORT).show();
+                intent.putExtra("rrule", "FREQ=" + putSessionFrequency(sessionFrq) + ";UNTIL=" + untilDate);
+            }else{
+                //a note will be 'Toasted' through putEndDate if we couldn't read the end date
+                intent.putExtra("rrule", "FREQ=" + putSessionFrequency(sessionFrq));
+            }
+
+            //put session length
+            intent.putExtra("endTime", cal.getTimeInMillis()+sessionInMs);
+
 
         }else if (b_cmt && b_due && b_howLong && b_frq){
 
+            /*//fill in event as if we do not know the due date
+            float sessionInMs = putSessionLength(strHrs, strMins);
+            float projectCmt = Float.parseFloat(strCmt);
+
+            intent.putExtra("endTime", cal.getTimeInMillis() +
+                    putSessionLength(strHrs, strMins)); //not using float sessionInMs because of calendar bug
+            intent.putExtra("rrule", "FREQ=" + putSessionFrequency(strFrq) +
+                    ";COUNT=" + putCountFromCmt(projectCmt, sessionInMs));
+
+            //check due date*/
         }
 
 
@@ -512,6 +538,50 @@ public class ProjectsList extends Activity {
         startActivity(intent);
     }
 
+
+    private String putFrqFromCmt(String aCmt, int aSessionInMs, Calendar aStart, Calendar anEnd){
+        String projectFrq;
+        float projectCmt = Float.parseFloat(aCmt);
+        float sessionInHrs = (float)aSessionInMs/(1000*60*60);
+        Toast.makeText(getApplicationContext(), "Length in Hrs: " + sessionInHrs, Toast.LENGTH_SHORT).show();
+        int numSessions = (int)Math.ceil(projectCmt/sessionInHrs);
+        Toast.makeText(getApplicationContext(), "Number of Session Needed: " + numSessions, Toast.LENGTH_SHORT).show();
+
+
+        int[] numDays = new int[7]; //represents the number of each day of the week, Sundays (0) through Saturdays (6)
+
+
+        for (Calendar loopCal = Calendar.getInstance(); loopCal.before(anEnd); loopCal.add(Calendar.DATE, 1)) {
+            //Calendar.Sunday == 1 and Calendar.SATURDAY == 7
+            //numDays[0] == Sunday and numDays[6] == Saturday
+            int thisDayOfWeek = loopCal.get(Calendar.DAY_OF_WEEK)-1;
+            numDays[thisDayOfWeek] += 1;
+        }
+
+        int dayOfWeekToday = aStart.get(Calendar.DAY_OF_WEEK)-1;
+        //if the number of Mondays, Tuesdays, etc between now and the due date is greater than the number of sessions needed, repeat those days
+        if (numDays[dayOfWeekToday] >= numSessions){
+            projectFrq = "1"; //starting today, we can repeat one day a week on every dayOfWeekToday
+        }else if(numDays[1]+numDays[2] >= numSessions){ //Monday and Tuesday
+            projectFrq = "2";
+        }else if(numDays[1]+numDays[2]+numDays[3] >= numSessions){ //Monday through Wednesday
+            projectFrq = "3";
+        }else if(numDays[1]+numDays[2]+numDays[3]+numDays[4] >= numSessions){ //Monday through Thursday
+            projectFrq = "4";
+        }else if(numDays[1]+numDays[2]+numDays[3]+numDays[4]+numDays[5] >= numSessions){ //Monday through Friday
+            projectFrq = "5";
+        }else if(numDays[1]+numDays[2]+numDays[3]+numDays[4]+numDays[5]+numDays[6] >= numSessions){ //Monday through Saturday
+            projectFrq = "6";
+        }else if(numDays[1]+numDays[2]+numDays[3]+numDays[4]+numDays[5]+numDays[6]+numDays[0] >= numSessions){ //Monday through Sunday
+            projectFrq = "7";
+        }else{
+            projectFrq = "8";
+            Toast.makeText(getApplicationContext(), "Warning: You will not finish this project on time without increasing your session length." , Toast.LENGTH_LONG).show();
+        }
+
+        return projectFrq;
+    }
+
     private int putLengthFromCmt(String aCmt, String aFrq, Calendar aStart, Calendar anEnd){
         //divide the time commitment by the number of sessions between now and the due date
 
@@ -519,7 +589,7 @@ public class ProjectsList extends Activity {
         int numSessions = 0;
         int dayOfWeekToday = aStart.get(Calendar.DAY_OF_WEEK);
 
-        for (Calendar loopCal = aStart; loopCal.before(anEnd); loopCal.add(Calendar.DATE, 1)) {
+        for (Calendar loopCal = Calendar.getInstance(); loopCal.before(anEnd); loopCal.add(Calendar.DATE, 1)) {
 
             int sessionFrq = Integer.parseInt(aFrq); //how often user has chosen to work per week
             if (sessionFrq == 1){ //if weekly sessions, beginning today:
@@ -562,13 +632,13 @@ public class ProjectsList extends Activity {
     }
 
     private Calendar stringToCalendar(String aDateString){
-        Calendar endCal = Calendar.getInstance();
+        Calendar myCal = Calendar.getInstance();
         SimpleDateFormat formatIn = new SimpleDateFormat("MMMM dd, yyyy", Locale.US);
 
         try {
 
             Date projectDate = formatIn.parse(aDateString.toLowerCase()); //use format to parse parameter into Date projectDate
-            endCal.setTime(projectDate);
+            myCal.setTime(projectDate);
         } catch (ParseException e) {
             Toast.makeText(getApplicationContext(), "We were unable use your due date", Toast.LENGTH_SHORT).show();
             Logger.getLogger(getClass().getName()).log(Level.WARNING, "could not parse due date");
@@ -576,7 +646,7 @@ public class ProjectsList extends Activity {
             return null;
         }
 
-        return endCal;
+        return myCal;
     }
 
     private String putEndDate(Calendar anEndCal){
@@ -637,7 +707,7 @@ public class ProjectsList extends Activity {
                 frqParam = "WEEKLY;BYDAY=MO,TU,WE,TH";
                 break;
             case 5:
-                frqParam = "WEEKLY;BYDAY=MO,TU,WE,TH,FRI";
+                frqParam = "WEEKLY;BYDAY=MO,TU,WE,TH,FR";
                 break;
             case 6:
                 frqParam = "WEEKLY;BYDAY=MO,TU,WE,TH,FR,SA";
