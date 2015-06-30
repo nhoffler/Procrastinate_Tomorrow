@@ -2,7 +2,11 @@ package com.google.procrastinatelater;
 
 import android.app.Activity;
 import android.app.FragmentTransaction;
+import android.content.ContentResolver;
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -37,9 +41,11 @@ public class ProjectsList extends Activity {
     EditText txtProjectTitle, txtTimeCmt, txtDueDate, txtHrsLong, txtMinsLong, txtFrq; //text fields
     Button saveProjectButton, clearProjectButton; //buttons
 
-
     String projectImageUri = null; //current project's image path
     private static final Uri DEFAULT_URI = Uri.parse("android.resource://com.google.procrastinatelater/drawable/default_photo"); //default image
+
+    Long tentativeEventId = null; //event id expected for the next event created
+    Project updatedProject = null; //used in OnResume when we need the id of the project created to add its event
 
     //background and non-physical components
     FrameLayout newProjectFrame; //clicking this should empty out all fields
@@ -124,6 +130,28 @@ public class ProjectsList extends Activity {
         });
 
         fillFields(null); //make sure text fields are empty, set up button onClickListener
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        Cursor cursor = getContentResolver().query(CalendarContract.Events.CONTENT_URI, new String[]{"MAX(_id) as max_id"}, null, null, "_id");
+        cursor.moveToFirst();
+        long newEventId = cursor.getLong(cursor.getColumnIndex("max_id")); //the last event created has this id
+        //Toast.makeText(getApplicationContext(),"tentative: " + tentativeEventId, Toast.LENGTH_SHORT).show();
+        //Toast.makeText(getApplicationContext(),"actual id: " + newEventId, Toast.LENGTH_SHORT).show();
+
+
+        if (tentativeEventId != null && tentativeEventId == newEventId){
+            //save this id
+            Toast.makeText(getApplicationContext(), getString(R.string.event_saved) + newEventId, Toast.LENGTH_SHORT).show();
+            updatedProject.setEventId("" + newEventId);
+            dbHandler.updateProject(updatedProject);
+        }
+
+        tentativeEventId = null;
+        updatedProject = null;
     }
 
     private boolean projectNameExists(Project project){
@@ -319,9 +347,17 @@ public class ProjectsList extends Activity {
                         Toast.makeText(getApplicationContext(), title + " " + getString(R.string.project_created), Toast.LENGTH_SHORT).show();
                         //Toast.makeText(getApplicationContext(), dbHandler.getProjectCount() + " projects!", Toast.LENGTH_SHORT).show();
 
+                        Cursor cursor = getContentResolver().query(CalendarContract.Events.CONTENT_URI, new String[]{"MAX(_id) as max_id"}, null, null, "_id");
+                        cursor.moveToFirst();
+                        tentativeEventId = cursor.getLong(cursor.getColumnIndex("max_id"))+1;
+                        updatedProject = project;
+                        Toast.makeText(getApplicationContext(),"Next id: " + tentativeEventId, Toast.LENGTH_SHORT).show();
+
                         evHandler = new EventHandler(getApplicationContext());
                         Intent eventIntent = evHandler.createEvent(project);
                         startActivity(eventIntent);
+
+
 
                     } else { //message: not enough project info
                         Toast.makeText(getApplicationContext(), getString(R.string.project_missing_info), Toast.LENGTH_SHORT).show();
@@ -395,7 +431,28 @@ public class ProjectsList extends Activity {
                             projectsList.set(projectIndex, aProject);
                         }
                         populateList();
-                        //Toast.makeText(getApplicationContext(), title + " " + getString(R.string.project_updated), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "Project " + title + " " + getString(R.string.project_updated), Toast.LENGTH_SHORT).show();
+
+                        //delete past and future events.
+                        String eventId = aProject.getEventId();
+                        if (eventId != null){ //if there is an event for this project in the calendar
+                            //delete events from calendar
+                            //Uri eventsUri = Uri.parse(getCalendarUriBase()+"events");
+                            Uri eventUri = ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, Long.parseLong(eventId));
+                            getContentResolver().delete(eventUri, null, null);
+                            //Toast.makeText(getApplicationContext(), "Event deleted", Toast.LENGTH_SHORT).show();
+                        }
+                        //create new event.
+                        Cursor cursor = getContentResolver().query(CalendarContract.Events.CONTENT_URI, new String[]{"MAX(_id) as max_id"}, null, null, "_id");
+                        cursor.moveToFirst();
+                        tentativeEventId = cursor.getLong(cursor.getColumnIndex("max_id"))+1;
+                        updatedProject = aProject;
+                        Toast.makeText(getApplicationContext(),"Next id: " + tentativeEventId, Toast.LENGTH_SHORT).show();
+
+                        evHandler = new EventHandler(getApplicationContext());
+                        Intent eventIntent = evHandler.createEvent(aProject);
+                        startActivity(eventIntent);
+
 
                     } else { //message: not enough project info
                         Toast.makeText(getApplicationContext(), getString(R.string.project_missing_info), Toast.LENGTH_SHORT).show();
@@ -418,9 +475,20 @@ public class ProjectsList extends Activity {
         clearProjectButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                dbHandler.deleteProject(aProject);
-                projectsList.remove(aProject);
-                populateList();
+
+                dbHandler.deleteProject(aProject); //delete from database
+                projectsList.remove(aProject); //delete from project list sidebar
+                populateList(); //refresh project list
+
+                String eventId = aProject.getEventId();
+                if (eventId != null){ //if there is an event for this project in the calendar
+                    //delete events from calendar
+                    //Uri eventsUri = Uri.parse(getCalendarUriBase()+"events");
+                    Uri eventUri = ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, Long.parseLong(eventId));
+                    getContentResolver().delete(eventUri, null, null);
+                    //Toast.makeText(getApplicationContext(), "Event deleted", Toast.LENGTH_SHORT).show();
+                }
+
                 fillFields(null);
                 Toast.makeText(getApplicationContext(), aProject.getName() + " " + getString(R.string.project_deleted), Toast.LENGTH_SHORT).show();
             }

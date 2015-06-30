@@ -9,7 +9,7 @@ import java.net.URI;
  */
 public class Project {
     private long iId;
-    private String iName, iCmt, iDueDate, iSnHrs, iSnMins, iSnFrq, iImgPath;
+    private String iName, iCmt, iDueDate, iSnHrs, iSnMins, iSnFrq, iImgPath, iEventId;
 
     public Project(long aId, String aName, String aCmt, String aDueDate, String aSnHrs, String aSnMins, String aSnFrq, String aImgPath) {
         iId = aId;
@@ -20,6 +20,19 @@ public class Project {
         iSnMins = aSnMins;
         iSnFrq = aSnFrq;
         iImgPath = aImgPath;
+        iEventId = null;
+    }
+
+    public Project(long aId, String aName, String aCmt, String aDueDate, String aSnHrs, String aSnMins, String aSnFrq, String aImgPath, String aEventId) {
+        iId = aId;
+        iName = aName;
+        iCmt = aCmt;
+        iDueDate = aDueDate;
+        iSnHrs = aSnHrs;
+        iSnMins = aSnMins;
+        iSnFrq = aSnFrq;
+        iImgPath = aImgPath;
+        iEventId = aEventId;
     }
 
     public long getId() {
@@ -29,7 +42,6 @@ public class Project {
     public void setId(long aId){
         iId = aId;
     }
-
 
     public String getName() {
         return iName;
@@ -85,5 +97,11 @@ public class Project {
 
     public void setImgPath(String aImgPath) {
         iImgPath = aImgPath;
+    }
+
+    public String getEventId() { return iEventId; }
+
+    public void setEventId(String aEventId) {
+        iEventId = aEventId;
     }
 }

@@ -27,7 +27,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             KEY_HRSLONG = "hrsLong", //session length in hours
             KEY_MINSLONG = "minsLong", //session length in minutes
             KEY_FRQ = "frq", //session frequency
-            KEY_IMGPATH = "imgPath"; //image path...
+            KEY_IMGPATH = "imgPath", //image path...
+            KEY_EVENTID = "eventID"; //id of event in Android calendar
 
     /**
      * Create a helper object to create, open, and/or manage a database.
@@ -50,18 +51,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 KEY_HRSLONG + " TEXT, " +
                 KEY_MINSLONG + " TEXT, " +
                 KEY_FRQ + " TEXT, " +
-                KEY_IMGPATH + " TEXT)");
-        //DATE instead of TEXT for dueDate???
-    }
-
-    /**
-     * for dropping my table and recreating the database
-     * call placed inside ProjectsList and run 1 time, then deleted
-     * There has to be an easier way -_-
-     */
-    public void upgradeOverride(){
-        SQLiteDatabase db = getWritableDatabase();
-        onUpgrade(db, 1, 2);
+                KEY_IMGPATH + " TEXT, " +
+                KEY_EVENTID + " TEXT)");
     }
 
     @Override
@@ -87,6 +78,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(KEY_MINSLONG, project.getSnMins());
         values.put(KEY_FRQ, project.getSnFrq());
         values.put(KEY_IMGPATH, project.getImgPath());
+        values.put(KEY_EVENTID, project.getEventId());
 
         long generatedKey = db.insert(TABLE_PROJECTS, null, values);
         project.setId(generatedKey);
@@ -94,6 +86,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         Logger.getLogger(getClass().getName()).info("Saved "
                 + project.getName() + " project to database with image "
                 + project.getImgPath());
+
         return generatedKey;
     }
 
@@ -106,7 +99,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = getReadableDatabase();
 
         String[] columns = new String[]{KEY_ID, KEY_PROJECTNAME, KEY_TIMECMT, KEY_DUEDATE, KEY_HRSLONG,
-                KEY_MINSLONG, KEY_TIMECMT, KEY_IMGPATH};
+                KEY_MINSLONG, KEY_TIMECMT, KEY_IMGPATH, KEY_EVENTID};
         Cursor cursor = db.query(TABLE_PROJECTS, columns, KEY_ID + "=?", new String[]{String.valueOf(id)}, null, null, null, null);
         Project project = null;
         if (cursor != null) {
@@ -114,7 +107,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
         project = new Project(Long.parseLong(cursor.getString(0)),
                 cursor.getString(1), cursor.getString(2), cursor.getString(3), cursor.getString(4),
-                cursor.getString(5), cursor.getString(6), cursor.getString(7));
+                cursor.getString(5), cursor.getString(6), cursor.getString(7), cursor.getString(8));
 
         cursor.close();
         db.close();
@@ -137,6 +130,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(KEY_MINSLONG, project.getSnMins());
         values.put(KEY_FRQ, project.getSnFrq());
         values.put(KEY_IMGPATH, project.getImgPath());
+        values.put(KEY_EVENTID, project.getEventId());
 
         int rowsAffected = db.update(TABLE_PROJECTS, values, KEY_ID + "=?", new String[]{String.valueOf(project.getId())});
         db.close();
@@ -181,7 +175,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             do{
                 projects.add(new Project(Long.parseLong(cursor.getString(0)), cursor.getString(1),
                         cursor.getString(2), cursor.getString(3), cursor.getString(4),
-                        cursor.getString(5), cursor.getString(6), cursor.getString(7)));
+                        cursor.getString(5), cursor.getString(6), cursor.getString(7), cursor.getString(8)));
             }while (cursor.moveToNext());
         }
 

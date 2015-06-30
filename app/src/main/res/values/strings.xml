@@ -29,6 +29,8 @@
     <string name="project_updated"> has been updated.</string>
     <string name="project_deleted"> has been deleted from your projects.</string>
 
+    <string name="event_saved">Calendar event saved.</string>
+
     <string name="project_no_title">Missing a Project Title</string>
     <string name="project_missing_info">Please enter more information about your project.</string>
     <string name="project_message">Info about existing Project</string>
