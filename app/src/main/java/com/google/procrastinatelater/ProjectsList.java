@@ -23,14 +23,8 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -44,7 +38,7 @@ public class ProjectsList extends Activity {
     String projectImageUri = null; //current project's image path
     private static final Uri DEFAULT_URI = Uri.parse("android.resource://com.google.procrastinatelater/drawable/default_photo"); //default image
 
-    Long tentativeEventId = null; //event id expected for the next event created
+    Long previousEventId = null; //event id expected for the next event created
     Project updatedProject = null; //used in OnResume when we need the id of the project created to add its event
 
     //background and non-physical components
@@ -139,18 +133,17 @@ public class ProjectsList extends Activity {
         Cursor cursor = getContentResolver().query(CalendarContract.Events.CONTENT_URI, new String[]{"MAX(_id) as max_id"}, null, null, "_id");
         cursor.moveToFirst();
         long newEventId = cursor.getLong(cursor.getColumnIndex("max_id")); //the last event created has this id
-        //Toast.makeText(getApplicationContext(),"tentative: " + tentativeEventId, Toast.LENGTH_SHORT).show();
-        //Toast.makeText(getApplicationContext(),"actual id: " + newEventId, Toast.LENGTH_SHORT).show();
+        Logger.getLogger(getClass().getName()).info("Resume " + newEventId + " last event created");
 
-
-        if (tentativeEventId != null && tentativeEventId == newEventId){
+        if (previousEventId != null && previousEventId < newEventId){ //sometimes the next event is not 1 above the previous event's id. Just take the last new event id
             //save this id
-            Toast.makeText(getApplicationContext(), getString(R.string.event_saved) + newEventId, Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), newEventId + getString(R.string.event_saved) + newEventId, Toast.LENGTH_SHORT).show();
+            Logger.getLogger(getClass().getName()).info("Resume: " + newEventId + " created");
             updatedProject.setEventId("" + newEventId);
             dbHandler.updateProject(updatedProject);
         }
 
-        tentativeEventId = null;
+        previousEventId = null;
         updatedProject = null;
     }
 
@@ -349,9 +342,9 @@ public class ProjectsList extends Activity {
 
                         Cursor cursor = getContentResolver().query(CalendarContract.Events.CONTENT_URI, new String[]{"MAX(_id) as max_id"}, null, null, "_id");
                         cursor.moveToFirst();
-                        tentativeEventId = cursor.getLong(cursor.getColumnIndex("max_id"))+1;
+                        previousEventId = cursor.getLong(cursor.getColumnIndex("max_id"));
                         updatedProject = project;
-                        Toast.makeText(getApplicationContext(),"Next id: " + tentativeEventId, Toast.LENGTH_SHORT).show();
+                        Logger.getLogger(getClass().getName()).info("Create: Event " + previousEventId + "previous");
 
                         evHandler = new EventHandler(getApplicationContext());
                         Intent eventIntent = evHandler.createEvent(project);
@@ -440,14 +433,14 @@ public class ProjectsList extends Activity {
                             //Uri eventsUri = Uri.parse(getCalendarUriBase()+"events");
                             Uri eventUri = ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, Long.parseLong(eventId));
                             getContentResolver().delete(eventUri, null, null);
-                            //Toast.makeText(getApplicationContext(), "Event deleted", Toast.LENGTH_SHORT).show();
+                            Logger.getLogger(getClass().getName()).info("Update: " + eventId + " deleted");
                         }
                         //create new event.
                         Cursor cursor = getContentResolver().query(CalendarContract.Events.CONTENT_URI, new String[]{"MAX(_id) as max_id"}, null, null, "_id");
                         cursor.moveToFirst();
-                        tentativeEventId = cursor.getLong(cursor.getColumnIndex("max_id"))+1;
+                        previousEventId = cursor.getLong(cursor.getColumnIndex("max_id"));
                         updatedProject = aProject;
-                        Toast.makeText(getApplicationContext(),"Next id: " + tentativeEventId, Toast.LENGTH_SHORT).show();
+                        Logger.getLogger(getClass().getName()).info("Update: " + previousEventId + " previous");
 
                         evHandler = new EventHandler(getApplicationContext());
                         Intent eventIntent = evHandler.createEvent(aProject);
@@ -486,7 +479,7 @@ public class ProjectsList extends Activity {
                     //Uri eventsUri = Uri.parse(getCalendarUriBase()+"events");
                     Uri eventUri = ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, Long.parseLong(eventId));
                     getContentResolver().delete(eventUri, null, null);
-                    //Toast.makeText(getApplicationContext(), "Event deleted", Toast.LENGTH_SHORT).show();
+                    Logger.getLogger(getClass().getName()).info("Delete: " + eventId + " deleted");
                 }
 
                 fillFields(null);
