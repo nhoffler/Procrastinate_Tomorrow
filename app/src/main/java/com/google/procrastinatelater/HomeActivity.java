@@ -1,6 +1,7 @@
 package com.google.procrastinatelater;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
 import android.provider.CalendarContract;
@@ -10,6 +11,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -93,12 +95,20 @@ public class HomeActivity extends Activity {
     }
 
     public void goToCalendar(View view) {
-        Intent getCalendarScreenIntent = new Intent(this, CalendarActivity.class);
-        startActivity(getCalendarScreenIntent);
+        //old code to show self-made calendar
+        //Intent getCalendarScreenIntent = new Intent(this, CalendarActivity.class);
+        //startActivity(getCalendarScreenIntent);
 
-
-
-
+        //new code to user's calendar
+        try {
+            ComponentName cn;
+            Intent i = new Intent();
+            cn = new ComponentName("com.android.calendar", "com.android.calendar.LaunchActivity");
+            i.setComponent(cn);
+            startActivity(i);
+        }catch (android.content.ActivityNotFoundException e){
+            Toast.makeText(getApplicationContext(), "Sorry, this feature is not compatible with your Android version.", Toast.LENGTH_LONG).show();
+        }
 
     }
 }

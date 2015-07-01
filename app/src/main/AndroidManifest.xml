@@ -23,6 +23,7 @@
         <activity
             android:name=".CalendarActivity"
             android:label="Your Calendar" >
+
         </activity>
         <activity
             android:name=".ProjectsList"

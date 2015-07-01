@@ -14,12 +14,35 @@
         android:layout_weight="1"
         android:background="@color/main_color">
 
-        <TextView android:text="@string/title_message" android:layout_width="match_parent"
+        <Space
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingTop="25dp"
-            android:textColor="@color/neutral_color"
-            android:paddingLeft="20dp"
-            android:paddingRight="20dp" />
+            android:layout_gravity="center_horizontal"
+            android:layout_weight="1"/>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/titleLayout"
+            android:focusableInTouchMode="false">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/imageView"
+                android:src="@drawable/title_blue"/>
+
+            <TextView android:text="@string/title_message" android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="25dp"
+                android:textColor="@color/neutral_color"
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp"
+                      android:gravity="center_horizontal"
+                />
+
+        </LinearLayout>
 
         <Space
             android:layout_width="match_parent"
@@ -90,7 +113,7 @@
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content">
 
         <TextView
             android:layout_width="wrap_content"
@@ -100,7 +123,8 @@
             android:id="@+id/projectsMessage"
             android:textColor="@color/contrasting_color"
             android:layout_gravity="center_horizontal|top"
-            android:paddingTop="35dp" />
+            android:paddingTop="35dp"
+            android:layout_margin="50dp"/>
     </FrameLayout>
 
 </LinearLayout>
