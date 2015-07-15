@@ -51,4 +51,16 @@
 
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_projects_list">Projects List</string>
+
+    <string name="help">Help</string>
+    <string name="home">Home</string>
+    <string name="projects">Projects</string>
+    <string name="calendar">Calendar</string>
+    <string name="todo">To-do List</string>
+    <string name="explain_home">The home screen shows three paths: your projects,
+        your calendar, and your to-do list.</string>
+    <string name="explain_projects">From the projects page you may add new projects
+        and update or delete existing projects. When you give us information about a
+        project, we calculate any missing information and create working sessions for
+        you to work towards your goal. In order to make our calculations, we need:</string>
 </resources>

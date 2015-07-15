@@ -82,6 +82,11 @@ public class HomeActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
+    public void showHelp(View view){
+        //show help screen
+        setContentView(R.layout.help_layout);
+    }
+
     public void goToProjects(View view) {
         Intent getProjectsScreenIntent = new Intent(this, ProjectsList.class);
         final int result = 1;
@@ -109,6 +114,6 @@ public class HomeActivity extends Activity {
         }catch (android.content.ActivityNotFoundException e){
             Toast.makeText(getApplicationContext(), "Sorry, this feature is not compatible with your Android version.", Toast.LENGTH_LONG).show();
         }
-
     }
+
 }

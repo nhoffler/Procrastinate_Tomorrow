@@ -4,21 +4,30 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.google.procrastinatelater.HomeActivity"
-    android:weightSum="3">
+    tools:context="com.google.procrastinatelater.HomeActivity">
 
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:layout_weight="8"
         android:background="@color/main_color">
+
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:id="@+id/to_help_img"
+            android:padding="5dp"
+            android:src="@drawable/help_img"
+            android:layout_gravity="right"
+            android:onClick="showHelp"
+            android:layout_margin="20dp"/>
 
         <Space
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_weight="1"/>
+            android:layout_weight=".5"/>
 
         <LinearLayout
             android:orientation="vertical"
@@ -31,12 +40,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/imageView"
-                android:src="@drawable/title_blue"/>
+                android:src="@drawable/title_blue"
+                android:layout_margin="10dp"/>
 
             <TextView android:text="@string/title_message" android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingTop="25dp"
-                android:textColor="@color/neutral_color"
+                      android:textColor="@color/neutral_color"
                 android:paddingLeft="20dp"
                 android:paddingRight="20dp"
                       android:gravity="center_horizontal"
@@ -48,7 +57,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_weight="1"/>
+            android:layout_weight="1.5"/>
 
         <LinearLayout
             android:orientation="horizontal"
@@ -61,9 +70,10 @@
             <ImageView
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:id="@+id/to_projects_Img"
+                android:id="@+id/to_projects_image"
                 android:src="@drawable/projects_img"
-                android:padding="5dp"/>
+                android:padding="5dp"
+                android:focusableInTouchMode="false"/>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -107,13 +117,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_weight=".5"/>
+            android:layout_weight="1"/>
 
     </LinearLayout>
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_weight="2">
 
         <TextView
             android:layout_width="wrap_content"
@@ -124,7 +135,7 @@
             android:textColor="@color/contrasting_color"
             android:layout_gravity="center_horizontal|top"
             android:paddingTop="35dp"
-            android:layout_margin="50dp"/>
+            />
     </FrameLayout>
 
 </LinearLayout>
