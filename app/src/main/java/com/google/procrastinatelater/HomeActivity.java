@@ -97,11 +97,7 @@ public class HomeActivity extends Activity {
     }
 
     public void goToCalendar(View view) {
-        //old code to show self-made calendar
-        //Intent getCalendarScreenIntent = new Intent(this, CalendarActivity.class);
-        //startActivity(getCalendarScreenIntent);
-
-        //new code to user's calendar
+        //to user's calendar
         try {
             ComponentName cn;
             Intent i = new Intent();

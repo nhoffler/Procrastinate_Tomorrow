@@ -21,10 +21,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".CalendarActivity"
-            android:label="Your Calendar" >
-        </activity>
-        <activity
             android:name=".ProjectsList"
             android:label="@string/title_activity_projects_list" >
         </activity>
