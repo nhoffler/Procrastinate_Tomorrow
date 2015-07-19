@@ -63,4 +63,5 @@
         and update or delete existing projects. When you give us information about a
         project, we calculate any missing information and create working sessions for
         you to work towards your goal. In order to make our calculations, we need:</string>
+    <string name="title_activity_help">HelpActivity</string>
 </resources>

@@ -83,19 +83,16 @@ public class HomeActivity extends Activity {
     }
 
     public void showHelp(View view){
-        //show help screen
-        setContentView(R.layout.help_layout);
+        //go to help screen
+        Intent getHelpScreenIntent = new Intent(this, HelpActivity.class);
+        startActivity(getHelpScreenIntent);
+        //setContentView(R.layout.help_layout);
     }
 
     public void goToProjects(View view) {
+        //go to projects 'page'
         Intent getProjectsScreenIntent = new Intent(this, ProjectsList.class);
-        final int result = 1;
-        //how to make Android Apps 5 Derek Banas. 14 minutes
-        // to pass data
-        // getProjectsScreenIntent.putExtra("string's name", "string data to pass over");
-
         startActivity(getProjectsScreenIntent);
-        //startActivityForResult(getProjectsScreenIntent, result);
 
     }
 
