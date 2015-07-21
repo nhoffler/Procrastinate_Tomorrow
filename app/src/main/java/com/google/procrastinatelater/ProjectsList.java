@@ -4,11 +4,15 @@ import android.app.Activity;
 import android.app.FragmentTransaction;
 import android.content.ContentUris;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.CalendarContract;
+import android.provider.MediaStore;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,6 +25,8 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -227,12 +233,19 @@ public class ProjectsList extends Activity {
             final Project currentProject = projectsList.get(position);
 
             //project image
-            ImageView projectImage = (ImageView) convertView.findViewById(R.id.itemImage);
+            final ImageView projectImage = (ImageView) convertView.findViewById(R.id.itemImage);
             //Logger.getLogger(getClass().getName()).info("Setting projectImageView image to " + imageUri);
             String imgUri = currentProject.getImgPath();
             if (imgUri != null){
                 //TODO
-                //projectImage.setImageURI(Uri.parse(imgUri));
+                try {
+                    int iconWidth = 200;
+                    Bitmap projectBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), Uri.parse(imgUri));
+                    projectImage.setImageBitmap(Bitmap.createScaledBitmap(projectBitmap, iconWidth, iconWidth, true));
+
+                } catch (IOException e) {
+                    projectImage.setImageURI(DEFAULT_URI);
+                }
             }else{
                 projectImage.setImageURI(DEFAULT_URI);
             }
@@ -240,6 +253,8 @@ public class ProjectsList extends Activity {
                 //Logger.getLogger(getClass().getName()).log(Level.WARNING, "setting img url to default");
                 projectImage.setImageURI(DEFAULT_URI);
             }
+
+
 
             //project title
             TextView projectTitle = (TextView) convertView.findViewById(R.id.titleHere);
@@ -255,6 +270,7 @@ public class ProjectsList extends Activity {
             return convertView;
         }
     }
+
 
     public void fillFields(Project project){
         if (project == null){
@@ -277,7 +293,17 @@ public class ProjectsList extends Activity {
             String imageUri = project.getImgPath();
             if (imageUri != null) {
                 Logger.getLogger(getClass().getName()).info("Setting projectImageView image to " + imageUri);
-                projectImageView.setImageURI(Uri.parse(imageUri));
+                //todo
+
+                try {
+                    int iconWidth = 300;
+                    Bitmap projectBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), Uri.parse(imageUri));
+                    projectImageView.setImageBitmap(Bitmap.createScaledBitmap(projectBitmap, iconWidth, iconWidth, true));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    projectImageView.setImageURI(DEFAULT_URI);
+                }
+
             }else{
                 projectImageView.setImageURI(DEFAULT_URI);
             }
