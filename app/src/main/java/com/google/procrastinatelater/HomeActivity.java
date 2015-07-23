@@ -3,17 +3,23 @@ package com.google.procrastinatelater;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.CalendarContract;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 
@@ -33,17 +39,63 @@ public class HomeActivity extends Activity {
         toProjectsLayout = (LinearLayout) findViewById(R.id.toProjectsLayout);
         toCalendarLayout = (LinearLayout) findViewById(R.id.toCalendarLayout);
         projectsMessage = (TextView) findViewById(R.id.projectsMessage);
-
-
     }
 
     //update project number every time we return to the home activity
     @Override
     protected void onResume(){
         super.onResume();
-        //populate Today's Projects list
+        //connect to database. get id's for project events
+        LinearLayout todoLayout = (LinearLayout) findViewById(R.id.todoLayout);
         dbHandler = new DatabaseHandler(getApplicationContext());
-        List<Project> addableProjects = dbHandler.getAllProjects();
+        //sql here.
+
+        String[] projection = new String[] { CalendarContract.Events.CALENDAR_ID,
+                CalendarContract.Events.TITLE, CalendarContract.Events.DESCRIPTION, CalendarContract.Events.DTSTART,
+                CalendarContract.Events.DTEND, CalendarContract.Events.ALL_DAY, CalendarContract.Events.EVENT_LOCATION };
+        // 0 = January, 1 = February, ...
+        Calendar startTime = Calendar.getInstance();
+        startTime.set(2015,06,22,00,00);
+        Calendar endTime= Calendar.getInstance();
+        endTime.set(2015,06,23,00,00);
+
+        // the range is all data from today to tomorrow
+        String selection = "(( " + CalendarContract.Events.DTSTART + " >= " + startTime.getTimeInMillis() + " ) AND ( "
+                + CalendarContract.Events.DTSTART + " <= " + endTime.getTimeInMillis() + " ))";
+
+
+        Cursor cursor = this.getBaseContext().getContentResolver().query( CalendarContract.Events.CONTENT_URI, projection, selection, null, null );
+
+        // output the events
+        if (cursor.moveToFirst()) {
+            do {
+                //check event ID.
+                Toast.makeText( this.getApplicationContext(), "Event " + cursor.getString(1) + " from Calendar " + cursor.getInt(0)
+                        + " starting at " + (new Date(cursor.getLong(3))).toString(), Toast.LENGTH_LONG ).show();
+
+                View event = getLayoutInflater().inflate(R.layout.todo_item, null);
+                TextView todoTitle = (TextView)event.findViewById(R.id.todoTitle);
+                TextView todoTime = (TextView)event.findViewById(R.id.todoTime);
+                TextView todoLength = (TextView)event.findViewById(R.id.todoLength);
+
+                todoTitle.setText(cursor.getString(1));
+                todoTime.setText(new Date(cursor.getLong(3)).toString());
+                todoLength.setText("ummm");
+
+                todoLayout.addView(event);
+
+            } while ( cursor.moveToNext());
+        }
+        cursor.close();
+        //show Today's To Do List:
+
+
+
+
+
+
+        /*
+         List<Project> addableProjects = dbHandler.getAllProjects();
         int projectCount = dbHandler.getProjectCount();
         for (int i = 0; i < projectCount; i++){
             Projects.add(addableProjects.get(i));
@@ -57,6 +109,8 @@ public class HomeActivity extends Activity {
             }
             projectsMessage.setText(projectNames);
         }
+         */
+
     }
 
 
@@ -107,6 +161,10 @@ public class HomeActivity extends Activity {
         }catch (android.content.ActivityNotFoundException e){
             Toast.makeText(getApplicationContext(), "Sorry, this feature is not compatible with your Android version.", Toast.LENGTH_LONG).show();
         }
+    }
+
+    private void findEvents(){
+
     }
 
 }
