@@ -39,11 +39,11 @@
     <string name="action_settings">Settings</string>
     <string name="title_activity_home">Home Activity</string>
 
-    <string name="title_message">Why Procrastinate Today When You Can Procrastinate Tomorrow?</string>
+    <string name="title_message">Why procrastinate today when you can procrastinate tomorrow?</string>
     <string name="manage_projects">Manage Projects</string>
     <string name="view_calendar">View Calendar</string>
     <string name="title_activity_calendar">Calendar Activity</string>
-    <string name="no_sessions">0 sessions planned for today</string>
+    <string name="no_sessions">No sessions planned for today</string>
 
     <string name="hello_world">Hello world!</string>
     <string name="title_tproject_list">tProjects</string>

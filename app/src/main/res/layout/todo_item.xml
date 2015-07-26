@@ -28,8 +28,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="Starting Time"
-        android:id="@+id/todoTime"
+        android:text="Session Length"
+        android:id="@+id/todoLength"
         android:textColor="@color/neutral_color"
         android:layout_gravity="center_horizontal"/>
 
@@ -37,8 +37,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="Session Length"
-        android:id="@+id/todoLength"
+        android:text="Starting Time"
+        android:id="@+id/todoTime"
         android:textColor="@color/neutral_color"
         android:layout_gravity="center_horizontal"/>
 

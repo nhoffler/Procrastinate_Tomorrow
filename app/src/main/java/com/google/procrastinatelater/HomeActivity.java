@@ -11,21 +11,26 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import javax.xml.datatype.Duration;
+
 
 public class HomeActivity extends Activity {
     LinearLayout toProjectsLayout, toCalendarLayout;
-    TextView projectsMessage;
+    LinearLayout todoLayout;
+    TextView projectsMessage; //message is removed from todoLayout, and replaces the layout in todoFrame if the layout is empty
 
     List<Project> Projects = new ArrayList<>();
     DatabaseHandler dbHandler;
@@ -38,7 +43,9 @@ public class HomeActivity extends Activity {
         //these buttons' onClicks are set in activity_home.xml
         toProjectsLayout = (LinearLayout) findViewById(R.id.toProjectsLayout);
         toCalendarLayout = (LinearLayout) findViewById(R.id.toCalendarLayout);
-        projectsMessage = (TextView) findViewById(R.id.projectsMessage);
+        todoLayout = (LinearLayout) findViewById(R.id.todoLayout);
+        projectsMessage = (TextView) findViewById(R.id.projectsMessage); //message is removed from todoLayout, and replaces the layout in todoFrame if the layout is empty
+
     }
 
     //update project number every time we return to the home activity
@@ -46,18 +53,22 @@ public class HomeActivity extends Activity {
     protected void onResume(){
         super.onResume();
         //connect to database. get id's for project events
-        LinearLayout todoLayout = (LinearLayout) findViewById(R.id.todoLayout);
+        todoLayout.removeAllViews();
         dbHandler = new DatabaseHandler(getApplicationContext());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("KK:mm a");
+        Date startDate;
+        Date endDate;
         //sql here.
 
-        String[] projection = new String[] { CalendarContract.Events.CALENDAR_ID,
-                CalendarContract.Events.TITLE, CalendarContract.Events.DESCRIPTION, CalendarContract.Events.DTSTART,
-                CalendarContract.Events.DTEND, CalendarContract.Events.ALL_DAY, CalendarContract.Events.EVENT_LOCATION };
+        //event_id vs _id???
+        String[] projection = new String[] { CalendarContract.Events.ORIGINAL_ID,
+                CalendarContract.Events.TITLE, CalendarContract.Events.ALL_DAY,
+                CalendarContract.Events.DTSTART, CalendarContract.Events.DTEND};
         // 0 = January, 1 = February, ...
         Calendar startTime = Calendar.getInstance();
-        startTime.set(2015,06,22,00,00);
+        startTime.set(2015,06,26,00,00);
         Calendar endTime= Calendar.getInstance();
-        endTime.set(2015,06,23,00,00);
+        endTime.set(2015,06,27,00,00);
 
         // the range is all data from today to tomorrow
         String selection = "(( " + CalendarContract.Events.DTSTART + " >= " + startTime.getTimeInMillis() + " ) AND ( "
@@ -70,46 +81,38 @@ public class HomeActivity extends Activity {
         if (cursor.moveToFirst()) {
             do {
                 //check event ID.
-                Toast.makeText( this.getApplicationContext(), "Event " + cursor.getString(1) + " from Calendar " + cursor.getInt(0)
-                        + " starting at " + (new Date(cursor.getLong(3))).toString(), Toast.LENGTH_LONG ).show();
+                //Toast.makeText( this.getApplicationContext(), "Event " + cursor.getString(1) + " from Calendar " + cursor.getInt(0)+ " starting at " + (new Date(cursor.getLong(3))).toString(), Toast.LENGTH_LONG ).show();
 
                 View event = getLayoutInflater().inflate(R.layout.todo_item, null);
                 TextView todoTitle = (TextView)event.findViewById(R.id.todoTitle);
                 TextView todoTime = (TextView)event.findViewById(R.id.todoTime);
                 TextView todoLength = (TextView)event.findViewById(R.id.todoLength);
 
-                todoTitle.setText(cursor.getString(1));
-                todoTime.setText(new Date(cursor.getLong(3)).toString());
-                todoLength.setText("ummm");
+                //set text field values
+                todoTitle.setText(cursor.getString(1)); //event title
+                    startDate = new Date(cursor.getLong(3));
+                    endDate = new Date(cursor.getLong(4));
+                    long duration = endDate.getTime()-startDate.getTime();
+                    int hrs = (int)(duration/(1000*60*60));
+                    int mins = (int) (duration - (1000*60*60*hrs)) / (1000*60);
+                    String text = "";
+                if (hrs > 0){
+                    text += (hrs + " hrs ");
+                }
+                if (mins > 0){
+                    text += (mins + " mins");
+                }
+                todoLength.setText(text); //duration
+                todoTime.setText(dateFormat.format(startDate)); //starting time
 
                 todoLayout.addView(event);
 
             } while ( cursor.moveToNext());
+        }else{      //there are no sessions today
+            todoLayout.addView(projectsMessage);
         }
         cursor.close();
-        //show Today's To Do List:
 
-
-
-
-
-
-        /*
-         List<Project> addableProjects = dbHandler.getAllProjects();
-        int projectCount = dbHandler.getProjectCount();
-        for (int i = 0; i < projectCount; i++){
-            Projects.add(addableProjects.get(i));
-        }
-
-        //put project names into String
-        if (!addableProjects.isEmpty()){
-            String projectNames = "Your projects:";
-            for (int i = 0; i < projectCount; i++){
-                projectNames += " " + addableProjects.get(i).getName();
-            }
-            projectsMessage.setText(projectNames);
-        }
-         */
 
     }
 
