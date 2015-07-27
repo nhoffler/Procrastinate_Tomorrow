@@ -2,8 +2,12 @@ package com.google.procrastinatelater;
 
 import android.app.Activity;
 import android.content.ComponentName;
+import android.content.ContentResolver;
+import android.content.ContentUris;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.CalendarContract;
 import android.view.LayoutInflater;
@@ -62,9 +66,10 @@ public class HomeActivity extends Activity {
         //sql here.
 
         //event_id vs _id???
-        String[] projection = new String[] { CalendarContract.Events.ORIGINAL_ID,
-                CalendarContract.Events.TITLE, CalendarContract.Events.ALL_DAY,
-                CalendarContract.Events.DTSTART, CalendarContract.Events.DTEND};
+        String[] projection = new String[] { CalendarContract.Instances.EVENT_ID + " as " + CalendarContract.Instances.EVENT_ID,
+                CalendarContract.Instances.TITLE,
+                CalendarContract.Instances.DTSTART + " as " + CalendarContract.Instances.DTSTART,
+                CalendarContract.Instances.DTEND + " as " + CalendarContract.Instances.DTEND};
         // 0 = January, 1 = February, ...
         Calendar startToday = Calendar.getInstance();
         startToday.set(Calendar.HOUR_OF_DAY, 0);
@@ -72,15 +77,21 @@ public class HomeActivity extends Activity {
         startToday.set(Calendar.SECOND, 0);
         Calendar endToday= Calendar.getInstance();
         endToday.set(Calendar.HOUR_OF_DAY, 23);
-        endToday.set(Calendar.MINUTE, 59);
-        endToday.set(Calendar.SECOND, 59);
+        endToday.set(Calendar.MINUTE, 58);
+        endToday.set(Calendar.SECOND, 0);
 
         // the range is all data from today to tomorrow
-        String selection = "(( " + CalendarContract.Events.DTSTART + " >= " + startToday.getTimeInMillis() + " ) AND ( "
-                + CalendarContract.Events.DTSTART + " <= " + endToday.getTimeInMillis() + " ))";
+        String selection = "(( " + CalendarContract.Instances.DTSTART + " >= " + startToday.getTimeInMillis() + " ) AND ( "
+                + CalendarContract.Instances.DTSTART + " <= " + endToday.getTimeInMillis() + " ))";
 
 
-        Cursor cursor = this.getBaseContext().getContentResolver().query( CalendarContract.Events.CONTENT_URI, projection, selection, null, null );
+        Uri.Builder eventsUriBuilder = CalendarContract.Instances.CONTENT_URI.buildUpon();
+        ContentUris.appendId(eventsUriBuilder, startToday.getTimeInMillis());
+        ContentUris.appendId(eventsUriBuilder, endToday.getTimeInMillis());
+        Uri eventsUri = eventsUriBuilder.build();
+        Cursor cursor = null;
+        cursor = this.getBaseContext().getContentResolver().query(eventsUri, projection, null, null, CalendarContract.Instances.DTSTART + " ASC");
+
 
         // output the events
         if (cursor.moveToFirst()) {
@@ -95,8 +106,8 @@ public class HomeActivity extends Activity {
 
                 //set text field values
                 todoTitle.setText(cursor.getString(1)); //event title
-                    startDate = new Date(cursor.getLong(3));
-                    endDate = new Date(cursor.getLong(4));
+                    startDate = new Date(cursor.getLong(2));
+                    endDate = new Date(cursor.getLong(3));
                     long duration = endDate.getTime()-startDate.getTime();
                     int hrs = (int)(duration/(1000*60*60));
                     int mins = (int) (duration - (1000*60*60*hrs)) / (1000*60);
@@ -108,7 +119,11 @@ public class HomeActivity extends Activity {
                     text += (mins + " mins");
                 }
                 todoLength.setText(text); //duration
-                todoTime.setText(dateFormat.format(startDate)); //starting time
+                if (hrs == 24){
+                    todoTime.setText(R.string.all_day); //all day event
+                }else {
+                    todoTime.setText(dateFormat.format(startDate)); //starting time
+                }
 
                 todoLayout.addView(event);
 
