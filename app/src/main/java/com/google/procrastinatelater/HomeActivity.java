@@ -18,6 +18,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -65,14 +66,18 @@ public class HomeActivity extends Activity {
                 CalendarContract.Events.TITLE, CalendarContract.Events.ALL_DAY,
                 CalendarContract.Events.DTSTART, CalendarContract.Events.DTEND};
         // 0 = January, 1 = February, ...
-        Calendar startTime = Calendar.getInstance();
-        startTime.set(2015,06,26,00,00);
-        Calendar endTime= Calendar.getInstance();
-        endTime.set(2015,06,27,00,00);
+        Calendar startToday = Calendar.getInstance();
+        startToday.set(Calendar.HOUR_OF_DAY, 0);
+        startToday.set(Calendar.MINUTE, 0);
+        startToday.set(Calendar.SECOND, 0);
+        Calendar endToday= Calendar.getInstance();
+        endToday.set(Calendar.HOUR_OF_DAY, 23);
+        endToday.set(Calendar.MINUTE, 59);
+        endToday.set(Calendar.SECOND, 59);
 
         // the range is all data from today to tomorrow
-        String selection = "(( " + CalendarContract.Events.DTSTART + " >= " + startTime.getTimeInMillis() + " ) AND ( "
-                + CalendarContract.Events.DTSTART + " <= " + endTime.getTimeInMillis() + " ))";
+        String selection = "(( " + CalendarContract.Events.DTSTART + " >= " + startToday.getTimeInMillis() + " ) AND ( "
+                + CalendarContract.Events.DTSTART + " <= " + endToday.getTimeInMillis() + " ))";
 
 
         Cursor cursor = this.getBaseContext().getContentResolver().query( CalendarContract.Events.CONTENT_URI, projection, selection, null, null );
