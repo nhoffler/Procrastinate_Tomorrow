@@ -2,37 +2,23 @@ package com.google.procrastinatelater;
 
 import android.app.Activity;
 import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.ContentUris;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.CalendarContract;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
-import android.widget.FrameLayout;
-import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.TimeZone;
-
-import javax.xml.datatype.Duration;
 
 
 public class HomeActivity extends Activity {
@@ -63,18 +49,17 @@ public class HomeActivity extends Activity {
         //connect to database. get id's for project events
         todoLayout.removeAllViews();
         dbHandler = new DatabaseHandler(getApplicationContext());
-        SimpleDateFormat dateFormat = new SimpleDateFormat("KK:mm a");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm a");
         Date startDate;
         Date endDate;
-        //sql here.
 
-        //event_id vs _id???
+        //'sql' here
         String[] projection = new String[] { CalendarContract.Instances.EVENT_ID + " as " + CalendarContract.Instances.EVENT_ID,
                 CalendarContract.Instances.TITLE,
-                CalendarContract.Instances.DTSTART + " as " + CalendarContract.Instances.DTSTART,
-                CalendarContract.Instances.DTEND + " as " + CalendarContract.Instances.DTEND,
+                CalendarContract.Instances.BEGIN,
+                CalendarContract.Instances.END,
                 CalendarContract.Instances.ALL_DAY};
-        // 0 = January, 1 = February, ...
+        //set today's 12:00am to 11:59pm
         Calendar startToday = Calendar.getInstance();
         startToday.set(Calendar.HOUR_OF_DAY, 0);
         startToday.set(Calendar.MINUTE, 0);
@@ -85,8 +70,8 @@ public class HomeActivity extends Activity {
         endToday.set(Calendar.SECOND, 59);
 
         // the range is all data from today to tomorrow
-        String selection = "(( " + CalendarContract.Instances.DTSTART + " >= " + startToday.getTimeInMillis() + " ) AND ( "
-                + CalendarContract.Instances.DTSTART + " <= " + endToday.getTimeInMillis() + " ))";
+        String selection = "(( " + CalendarContract.Instances.BEGIN + " >= " + startToday.getTimeInMillis() + " ) AND ( "
+                + CalendarContract.Instances.BEGIN + " <= " + endToday.getTimeInMillis() + " ))";
 
 
         Uri.Builder eventsUriBuilder = CalendarContract.Instances.CONTENT_URI.buildUpon();
@@ -94,47 +79,47 @@ public class HomeActivity extends Activity {
         ContentUris.appendId(eventsUriBuilder, endToday.getTimeInMillis());
         Uri eventsUri = eventsUriBuilder.build();
         Cursor cursor = null;
-        cursor = this.getBaseContext().getContentResolver().query(eventsUri, projection, null, null, CalendarContract.Instances.DTSTART + " ASC");
+        cursor = this.getBaseContext().getContentResolver().query(eventsUri, projection, null, null, CalendarContract.Instances.BEGIN + " ASC");
 
         // output the events
         if (cursor.moveToFirst()) {
             do {
                 //Toast.makeText( this.getApplicationContext(), "Event " + cursor.getString(1) + " all day " + cursor.getString(4) + " starting at " + (new Date(cursor.getLong(3))).toString(), Toast.LENGTH_LONG ).show();
-
-                //check All-Day events
-                if (cursor.getInt(4) == 1){ //if the event is all day
-
-                }
-
                 //check event ID.
 
+                startDate = new Date(cursor.getLong(2));
+                endDate = new Date(cursor.getLong(3));
+                long duration = endDate.getTime()-startDate.getTime();
+                int hrs = (int)(duration/(1000*60*60));
+                int mins = (int) (duration - (1000*60*60*hrs))/(1000*60);
+                String dur = "";
 
+
+                //create view, set text field values
                 View event = getLayoutInflater().inflate(R.layout.todo_item, null);
                 TextView todoTitle = (TextView)event.findViewById(R.id.todoTitle);
                 TextView todoTime = (TextView)event.findViewById(R.id.todoTime);
                 TextView todoLength = (TextView)event.findViewById(R.id.todoLength);
 
-                //set text field values
                 todoTitle.setText(cursor.getString(1)); //event title
-                    startDate = new Date(cursor.getLong(2));
-                    endDate = new Date(cursor.getLong(3));
-                    long duration = endDate.getTime()-startDate.getTime();
-                    int hrs = (int)(duration/(1000*60*60));
-                    int mins = (int) (duration - (1000*60*60*hrs))/(1000*60);
-                    String text = "";
-                if (hrs > 0){
-                    text += (hrs + " hrs ");
-                }
-                if (mins > 0){
-                    text += (mins + " mins");
-                }
-                todoLength.setText(text); //duration
+                //check All-Day events
+                if (cursor.getInt(4) == 1){ //if the event is all day
+                    if (startDate.after(startToday.getTime())){      //if this event 'starts' today, it is actually an all day event for tomorrow.
 
-                if (hrs >= 24){
-                    todoTime.setText(R.string.all_day); //all day event
-                }else {
+                    }
+                    todoLength.setText(R.string.all_day);
+                }else{ //if event is not all day
+                    if (hrs > 0){
+                        dur += (hrs + " hrs ");
+                    }
+                    if (mins > 0){
+                        dur += (mins + " mins");
+                    }
+                    todoLength.setText(dur); //duration
                     todoTime.setText(dateFormat.format(startDate)); //starting time
                 }
+
+
 
                 todoLayout.addView(event);
             } while ( cursor.moveToNext());
