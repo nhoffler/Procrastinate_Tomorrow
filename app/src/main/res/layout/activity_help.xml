@@ -48,24 +48,10 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:text="@string/home"
-                android:id="@+id/homeTitle"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:text="@string/explain_home"
-                android:id="@+id/homeExp"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:text="@string/projects"
-                android:id="@+id/projectsTitle"
-                android:layout_marginTop="10dp"/>
+                android:id="@+id/homeExp"
+                android:layout_marginBottom="15dp"/>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -74,21 +60,6 @@
                 android:text="@string/explain_projects"
                 android:id="@+id/projectsExp"/>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:text="@string/calendar"
-                android:id="@+id/calendarTitle"
-                android:layout_marginTop="10dp"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:text="@string/todo"
-                android:id="@+id/todoTitle"
-                android:layout_marginTop="10dp"/>
         </LinearLayout>
     </ScrollView>
 

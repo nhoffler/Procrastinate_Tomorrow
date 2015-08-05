@@ -23,11 +23,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.TimeZone;
 
 import javax.xml.datatype.Duration;
 
@@ -69,7 +72,8 @@ public class HomeActivity extends Activity {
         String[] projection = new String[] { CalendarContract.Instances.EVENT_ID + " as " + CalendarContract.Instances.EVENT_ID,
                 CalendarContract.Instances.TITLE,
                 CalendarContract.Instances.DTSTART + " as " + CalendarContract.Instances.DTSTART,
-                CalendarContract.Instances.DTEND + " as " + CalendarContract.Instances.DTEND};
+                CalendarContract.Instances.DTEND + " as " + CalendarContract.Instances.DTEND,
+                CalendarContract.Instances.ALL_DAY};
         // 0 = January, 1 = February, ...
         Calendar startToday = Calendar.getInstance();
         startToday.set(Calendar.HOUR_OF_DAY, 0);
@@ -77,8 +81,8 @@ public class HomeActivity extends Activity {
         startToday.set(Calendar.SECOND, 0);
         Calendar endToday= Calendar.getInstance();
         endToday.set(Calendar.HOUR_OF_DAY, 23);
-        endToday.set(Calendar.MINUTE, 58);
-        endToday.set(Calendar.SECOND, 0);
+        endToday.set(Calendar.MINUTE, 59);
+        endToday.set(Calendar.SECOND, 59);
 
         // the range is all data from today to tomorrow
         String selection = "(( " + CalendarContract.Instances.DTSTART + " >= " + startToday.getTimeInMillis() + " ) AND ( "
@@ -92,12 +96,18 @@ public class HomeActivity extends Activity {
         Cursor cursor = null;
         cursor = this.getBaseContext().getContentResolver().query(eventsUri, projection, null, null, CalendarContract.Instances.DTSTART + " ASC");
 
-
         // output the events
         if (cursor.moveToFirst()) {
             do {
+                //Toast.makeText( this.getApplicationContext(), "Event " + cursor.getString(1) + " all day " + cursor.getString(4) + " starting at " + (new Date(cursor.getLong(3))).toString(), Toast.LENGTH_LONG ).show();
+
+                //check All-Day events
+                if (cursor.getInt(4) == 1){ //if the event is all day
+
+                }
+
                 //check event ID.
-                //Toast.makeText( this.getApplicationContext(), "Event " + cursor.getString(1) + " from Calendar " + cursor.getInt(0)+ " starting at " + (new Date(cursor.getLong(3))).toString(), Toast.LENGTH_LONG ).show();
+
 
                 View event = getLayoutInflater().inflate(R.layout.todo_item, null);
                 TextView todoTitle = (TextView)event.findViewById(R.id.todoTitle);
@@ -110,7 +120,7 @@ public class HomeActivity extends Activity {
                     endDate = new Date(cursor.getLong(3));
                     long duration = endDate.getTime()-startDate.getTime();
                     int hrs = (int)(duration/(1000*60*60));
-                    int mins = (int) (duration - (1000*60*60*hrs)) / (1000*60);
+                    int mins = (int) (duration - (1000*60*60*hrs))/(1000*60);
                     String text = "";
                 if (hrs > 0){
                     text += (hrs + " hrs ");
@@ -119,15 +129,16 @@ public class HomeActivity extends Activity {
                     text += (mins + " mins");
                 }
                 todoLength.setText(text); //duration
-                if (hrs == 24){
+
+                if (hrs >= 24){
                     todoTime.setText(R.string.all_day); //all day event
                 }else {
                     todoTime.setText(dateFormat.format(startDate)); //starting time
                 }
 
                 todoLayout.addView(event);
-
             } while ( cursor.moveToNext());
+
         }else{      //there are no sessions today
             todoLayout.addView(projectsMessage);
         }

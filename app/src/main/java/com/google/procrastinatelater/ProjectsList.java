@@ -243,7 +243,7 @@ public class ProjectsList extends Activity {
                     Bitmap projectBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), Uri.parse(imgUri));
                     projectImage.setImageBitmap(Bitmap.createScaledBitmap(projectBitmap, iconWidth, iconWidth, true));
 
-                } catch (IOException e) {
+                } catch (Exception e) {
                     projectImage.setImageURI(DEFAULT_URI);
                 }
             }else{
@@ -299,7 +299,7 @@ public class ProjectsList extends Activity {
                     int iconWidth = 300;
                     Bitmap projectBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), Uri.parse(imageUri));
                     projectImageView.setImageBitmap(Bitmap.createScaledBitmap(projectBitmap, iconWidth, iconWidth, true));
-                } catch (IOException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                     projectImageView.setImageURI(DEFAULT_URI);
                 }

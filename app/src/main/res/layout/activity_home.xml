@@ -9,63 +9,62 @@
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="8"
+        android:layout_height="0dp"
+        android:layout_weight="7"
         android:background="@color/main_color">
 
         <ImageView
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
             android:id="@+id/to_help_img"
             android:padding="5dp"
             android:src="@drawable/help_img"
             android:layout_gravity="right"
             android:onClick="showHelp"
-            android:layout_margin="20dp"/>
-
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_weight=".5"/>
+            android:layout_weight=".1"
+            android:layout_marginTop="20dp"
+            android:layout_marginRight="20dp"/>
 
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             android:id="@+id/titleLayout"
-            android:focusableInTouchMode="false">
+            android:focusableInTouchMode="false"
+            android:layout_weight=".4">
 
             <ImageView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="0dp"
                 android:id="@+id/imageView"
                 android:src="@drawable/title_blue"
-                android:layout_margin="10dp"/>
+                android:layout_margin="10dp"
+                android:layout_weight=".8"/>
 
             <TextView android:text="@string/title_message" android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="0dp"
                       android:textColor="@color/neutral_color"
                 android:paddingLeft="20dp"
                 android:paddingRight="20dp"
                       android:gravity="center_horizontal"
-                />
+                      android:layout_weight=".2"/>
 
         </LinearLayout>
 
         <Space
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             android:layout_gravity="center_horizontal"
-            android:layout_weight="1.5"/>
+            android:layout_weight=".05"/>
 
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             android:layout_gravity="center_horizontal"
             android:id="@+id/toProjectsLayout"
-            android:onClick="goToProjects">
+            android:onClick="goToProjects"
+            android:layout_weight=".1">
 
             <ImageView
                 android:layout_width="50dp"
@@ -89,10 +88,11 @@
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             android:layout_gravity="center_horizontal"
             android:id="@+id/toCalendarLayout"
-            android:onClick="goToCalendar">
+            android:onClick="goToCalendar"
+            android:layout_weight=".1">
 
             <ImageView
                 android:layout_width="50dp"
@@ -115,22 +115,22 @@
 
         <Space
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             android:layout_gravity="center_horizontal"
-            android:layout_weight="1"/>
+            android:layout_weight=".1"/>
 
     </LinearLayout>
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="2"
+        android:layout_height="0dp"
+        android:layout_weight="3"
         android:layout_gravity="center"
         android:id="@+id/todoFrame">
 
         <HorizontalScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:id="@+id/todoScroll">
 
             <LinearLayout

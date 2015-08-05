@@ -54,15 +54,11 @@
     <string name="title_activity_projects_list">Projects List</string>
 
     <string name="help">Help</string>
-    <string name="home">Home</string>
-    <string name="projects">Projects</string>
-    <string name="calendar">Calendar</string>
-    <string name="todo">To-do List</string>
-    <string name="explain_home">The home screen shows three paths: your projects,
-        your calendar, and your to-do list.</string>
-    <string name="explain_projects">From the projects page you may add new projects
-        and update or delete existing projects. When you give us information about a
-        project, we calculate any missing information and create working sessions for
-        you to work towards your goal. In order to make our calculations, we need:</string>
+    <string name="explain_home">Procrastinate Later helps you achieve long term goals by breaking your project down into small,
+        manageable pieces. Let us do the math! We add sessions into your Android calendar to get your project done on time.</string>
+    <string name="explain_projects">When you give us information about a project, we calculate any missing information
+        to set up your workout sessions, study hours, and house-cleaning schedules. Just make sure to fill out at least
+        three of the four project criteria, unless you have a project with a set session time and frequency that should
+        repeat forever!</string>
     <string name="title_activity_help">HelpActivity</string>
 </resources>
