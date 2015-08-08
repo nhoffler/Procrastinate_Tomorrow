@@ -50,8 +50,6 @@ public class HomeActivity extends Activity {
         todoLayout.removeAllViews();
         dbHandler = new DatabaseHandler(getApplicationContext());
         SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm a");
-        Date startDate;
-        Date endDate;
 
         //'sql' here
         String[] projection = new String[] { CalendarContract.Instances.EVENT_ID + " as " + CalendarContract.Instances.EVENT_ID,
@@ -84,44 +82,53 @@ public class HomeActivity extends Activity {
         // output the events
         if (cursor.moveToFirst()) {
             do {
-                //Toast.makeText( this.getApplicationContext(), "Event " + cursor.getString(1) + " all day " + cursor.getString(4) + " starting at " + (new Date(cursor.getLong(3))).toString(), Toast.LENGTH_LONG ).show();
+                //Toast.makeText( this.getApplicationContext(), "Event " + cursor.getString(1) + " all day "
+                 //       + cursor.getString(4) + " starting at " + (new Date(cursor.getLong(3))).toString(), Toast.LENGTH_LONG ).show();
+
+
                 //check event ID.
 
-                startDate = new Date(cursor.getLong(2));
-                endDate = new Date(cursor.getLong(3));
-                long duration = endDate.getTime()-startDate.getTime();
-                int hrs = (int)(duration/(1000*60*60));
-                int mins = (int) (duration - (1000*60*60*hrs))/(1000*60);
-                String dur = "";
-
-
-                //create view, set text field values
+                //create to do view, set its event's text field values
                 View event = getLayoutInflater().inflate(R.layout.todo_item, null);
                 TextView todoTitle = (TextView)event.findViewById(R.id.todoTitle);
                 TextView todoTime = (TextView)event.findViewById(R.id.todoTime);
                 TextView todoLength = (TextView)event.findViewById(R.id.todoLength);
 
-                todoTitle.setText(cursor.getString(1)); //event title
-                //check All-Day events
-                if (cursor.getInt(4) == 1){ //if the event is all day
-                    if (startDate.after(startToday.getTime())){      //if this event 'starts' today, it is actually an all day event for tomorrow.
+                Date startDate = new Date(cursor.getLong(2));
+                Date endDate = new Date(cursor.getLong(3));
 
-                    }
-                    todoLength.setText(R.string.all_day);
-                }else{ //if event is not all day
+                if (cursor.getInt(4) == 0){ //if this is NOT an all day event
+
+                    long duration = endDate.getTime()-startDate.getTime();
+                    int hrs = (int)(duration/(1000*60*60));
+                    int mins = (int) (duration - (1000*60*60*hrs))/(1000*60);
+                    String dur = "";
                     if (hrs > 0){
                         dur += (hrs + " hrs ");
                     }
                     if (mins > 0){
                         dur += (mins + " mins");
                     }
-                    todoLength.setText(dur); //duration
+
+                    todoTitle.setText(cursor.getString(1)); //event title
                     todoTime.setText(dateFormat.format(startDate)); //starting time
+                    todoLength.setText(dur); //duration
+                    todoLayout.addView(event);  //add to To do list.
+
+                }else if (!startDate.after(startToday.getTime())){   //this is an all day event Correctly Pulled for today
+
+                    todoTitle.setText(cursor.getString(1)); //event title
+                    todoLength.setText(R.string.all_day); // say "all day" instead of number of hours
+                    todoTime.setText("");
+                    todoLayout.addView(event);  //add to To do list.
+
+                }else{ //this is an all day event for tomorrow, most likely
+
+                    //do nothing.
+                    //todoTitle.setText(cursor.getString(1)); //event title
+                    //todoLength.setText("");
+                    //todoTime.setText("");
                 }
-
-
-
-                todoLayout.addView(event);
             } while ( cursor.moveToNext());
 
         }else{      //there are no sessions today
