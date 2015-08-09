@@ -175,7 +175,8 @@ public class HomeActivity extends Activity {
 
             } while ( cursor.moveToNext());
 
-        }else{      //there are no sessions today
+        }
+        if (todoLayout.getChildCount() == 0){   //if there are no sessions today,
             todoLayout.addView(projectsMessage);
         }
         cursor.close();

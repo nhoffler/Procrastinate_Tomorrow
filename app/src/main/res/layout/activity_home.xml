@@ -132,7 +132,8 @@
         <HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/todoScroll">
+            android:id="@+id/todoScroll"
+            android:layout_gravity="center">
 
             <LinearLayout
                 android:orientation="horizontal"

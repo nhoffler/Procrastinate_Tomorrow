@@ -43,7 +43,7 @@
     <string name="manage_projects">Manage Projects</string>
     <string name="view_calendar">View Calendar</string>
     <string name="title_activity_calendar">Calendar Activity</string>
-    <string name="no_sessions">No sessions planned for today</string>
+    <string name="no_sessions">No Procrastinate Later sessions planned for today</string>
     <string name="all_day">all day</string>
 
     <string name="hello_world">Hello world!</string>
