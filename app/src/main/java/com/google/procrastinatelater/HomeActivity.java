@@ -5,12 +5,15 @@ import android.content.ComponentName;
 import android.content.ContentUris;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.CalendarContract;
+import android.provider.MediaStore;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,9 +28,8 @@ public class HomeActivity extends Activity {
     LinearLayout toProjectsLayout, toCalendarLayout;
     LinearLayout todoLayout;
     TextView projectsMessage; //message is removed from todoLayout, and replaces the layout in todoFrame if the layout is empty
-
-    List<Project> Projects = new ArrayList<>();
     DatabaseHandler dbHandler;
+    private static final Uri DEFAULT_URI = Uri.parse("android.resource://com.google.procrastinatelater/drawable/default_photo"); //default image
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,13 +48,29 @@ public class HomeActivity extends Activity {
     @Override
     protected void onResume(){
         super.onResume();
-        //connect to database. get id's for project events
-        todoLayout.removeAllViews();
+
+        //get list of all Procrastinate Later projects
         dbHandler = new DatabaseHandler(getApplicationContext());
+        List<Project> proProjects = dbHandler.getAllProjects();
+        ArrayList<Long> eventIds = new ArrayList<Long>();
+        int projectCount = dbHandler.getProjectCount();
+        String ids = "";
+        for (int i = 0; i < projectCount; i++){
+            eventIds.add(proProjects.get(i).getEventId());
+            //ids += proProjects.get(i).getEventId() + " ";
+        }
+        //Toast.makeText( this.getApplicationContext(), "Projects: " + ids, Toast.LENGTH_LONG ).show();
+
+
+
+
+        //Populate To Do List
+        todoLayout.removeAllViews(); //clear out old to do
         SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm a");
 
         //'sql' here
-        String[] projection = new String[] { CalendarContract.Instances.EVENT_ID + " as " + CalendarContract.Instances.EVENT_ID,
+        String[] projection = new String[] {
+                CalendarContract.Instances.EVENT_ID,
                 CalendarContract.Instances.TITLE,
                 CalendarContract.Instances.BEGIN,
                 CalendarContract.Instances.END,
@@ -76,59 +94,85 @@ public class HomeActivity extends Activity {
         ContentUris.appendId(eventsUriBuilder, startToday.getTimeInMillis());
         ContentUris.appendId(eventsUriBuilder, endToday.getTimeInMillis());
         Uri eventsUri = eventsUriBuilder.build();
-        Cursor cursor = null;
-        cursor = this.getBaseContext().getContentResolver().query(eventsUri, projection, null, null, CalendarContract.Instances.BEGIN + " ASC");
+        Cursor cursor = this.getBaseContext().getContentResolver().query(eventsUri, projection, null, null, CalendarContract.Instances.BEGIN + " ASC");
 
         // output the events
         if (cursor.moveToFirst()) {
             do {
+
                 //Toast.makeText( this.getApplicationContext(), "Event " + cursor.getString(1) + " all day "
-                 //       + cursor.getString(4) + " starting at " + (new Date(cursor.getLong(3))).toString(), Toast.LENGTH_LONG ).show();
-
-
-                //check event ID.
-
-                //create to do view, set its event's text field values
-                View event = getLayoutInflater().inflate(R.layout.todo_item, null);
-                TextView todoTitle = (TextView)event.findViewById(R.id.todoTitle);
-                TextView todoTime = (TextView)event.findViewById(R.id.todoTime);
-                TextView todoLength = (TextView)event.findViewById(R.id.todoLength);
+                //       + cursor.getString(4) + " starting at " + (new Date(cursor.getLong(3))).toString(), Toast.LENGTH_LONG ).show();
 
                 Date startDate = new Date(cursor.getLong(2));
                 Date endDate = new Date(cursor.getLong(3));
 
-                if (cursor.getInt(4) == 0){ //if this is NOT an all day event
+                //check event ID.
+                int eventIndex = eventIds.indexOf(cursor.getLong(0)); //index of event in proProjects. -1 if this event is not from Procrastinate Later
+                if (eventIndex > -1){ //if this is a Pro Later event,
 
-                    long duration = endDate.getTime()-startDate.getTime();
-                    int hrs = (int)(duration/(1000*60*60));
-                    int mins = (int) (duration - (1000*60*60*hrs))/(1000*60);
-                    String dur = "";
-                    if (hrs > 0){
-                        dur += (hrs + " hrs ");
+                    //create to do view, set its event's text field values
+                    View event = getLayoutInflater().inflate(R.layout.todo_item, null);
+                    TextView todoTitle = (TextView)event.findViewById(R.id.todoTitle);
+                    TextView todoTime = (TextView)event.findViewById(R.id.todoTime);
+                    TextView todoLength = (TextView)event.findViewById(R.id.todoLength);
+                    ImageView todoImg = (ImageView)event.findViewById(R.id.todoImg);
+
+                    //project image
+                    String imgUri = proProjects.get(eventIndex).getImgPath();
+                    if (imgUri != null){
+                        try {
+                            int iconWidth = 300;
+                            Bitmap projectBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), Uri.parse(imgUri));
+                            todoImg.setImageBitmap(Bitmap.createScaledBitmap(projectBitmap, iconWidth, iconWidth, true));
+
+                        } catch (Exception e) {
+                            todoImg.setImageURI(DEFAULT_URI);
+                        }
+                    }else{
+                        todoImg.setImageURI(DEFAULT_URI);
                     }
-                    if (mins > 0){
-                        dur += (mins + " mins");
+                    if(todoImg.getDrawable() == null){
+                        //Logger.getLogger(getClass().getName()).log(Level.WARNING, "setting img url to default");
+                        todoImg.setImageURI(DEFAULT_URI);
                     }
 
-                    todoTitle.setText(cursor.getString(1)); //event title
-                    todoTime.setText(dateFormat.format(startDate)); //starting time
-                    todoLength.setText(dur); //duration
-                    todoLayout.addView(event);  //add to To do list.
 
-                }else if (!startDate.after(startToday.getTime())){   //this is an all day event Correctly Pulled for today
 
-                    todoTitle.setText(cursor.getString(1)); //event title
-                    todoLength.setText(R.string.all_day); // say "all day" instead of number of hours
-                    todoTime.setText("");
-                    todoLayout.addView(event);  //add to To do list.
+                    if (cursor.getInt(4) == 0){ //if this is NOT an all day event
 
-                }else{ //this is an all day event for tomorrow, most likely
+                        long duration = endDate.getTime()-startDate.getTime();
+                        int hrs = (int)(duration/(1000*60*60));
+                        int mins = (int) (duration - (1000*60*60*hrs))/(1000*60);
+                        String dur = "";
+                        if (hrs > 0){
+                            dur += (hrs + " hrs ");
+                        }
+                        if (mins > 0){
+                            dur += (mins + " mins");
+                        }
 
-                    //do nothing.
-                    //todoTitle.setText(cursor.getString(1)); //event title
-                    //todoLength.setText("");
-                    //todoTime.setText("");
+                        todoTitle.setText(cursor.getString(1)); //event title
+                        todoTime.setText(dateFormat.format(startDate)); //starting time
+                        todoLength.setText(dur); //duration
+                        todoLayout.addView(event);  //add to To do list.
+
+                    }else if (!startDate.after(startToday.getTime())){   //this is an all day event Correctly Pulled for today
+
+                        todoTitle.setText(cursor.getString(1)); //event title
+                        todoLength.setText(R.string.all_day); // say "all day" instead of number of hours
+                        todoTime.setText("");
+                        todoLayout.addView(event);  //add to To do list.
+
+                    }
+                    /*else{ //this is an all day event for tomorrow, most likely
+
+                        //do nothing.
+                        todoTitle.setText(cursor.getString(1)); //event title
+                        todoLength.setText("this event is for tomorrow!");
+                        todoTime.setText("");
+                    }*/
                 }
+
             } while ( cursor.moveToNext());
 
         }else{      //there are no sessions today

@@ -5,11 +5,12 @@ import android.net.Uri;
 import java.net.URI;
 
 /**
+ * Project Class. Holds project info, and its event id and database id
  * Created by Nicole on 06-May-15.
  */
 public class Project {
-    private long iId;
-    private String iName, iCmt, iDueDate, iSnHrs, iSnMins, iSnFrq, iImgPath, iEventId;
+    private long iId, iEventId;
+    private String iName, iCmt, iDueDate, iSnHrs, iSnMins, iSnFrq, iImgPath;
 
     public Project(long aId, String aName, String aCmt, String aDueDate, String aSnHrs, String aSnMins, String aSnFrq, String aImgPath) {
         iId = aId;
@@ -20,10 +21,10 @@ public class Project {
         iSnMins = aSnMins;
         iSnFrq = aSnFrq;
         iImgPath = aImgPath;
-        iEventId = null;
+        iEventId = -1;
     }
 
-    public Project(long aId, String aName, String aCmt, String aDueDate, String aSnHrs, String aSnMins, String aSnFrq, String aImgPath, String aEventId) {
+    public Project(long aId, String aName, String aCmt, String aDueDate, String aSnHrs, String aSnMins, String aSnFrq, String aImgPath, Long aEventId) {
         iId = aId;
         iName = aName;
         iCmt = aCmt;
@@ -99,9 +100,9 @@ public class Project {
         iImgPath = aImgPath;
     }
 
-    public String getEventId() { return iEventId; }
+    public Long getEventId() { return iEventId; }
 
-    public void setEventId(String aEventId) {
+    public void setEventId(Long aEventId) {
         iEventId = aEventId;
     }
 }

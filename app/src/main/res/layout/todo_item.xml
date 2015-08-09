@@ -12,7 +12,7 @@
         android:layout_height="100dp"
         android:adjustViewBounds="true"
         android:scaleType="centerCrop"
-        android:id="@+id/imageView3"
+        android:id="@+id/todoImg"
         android:layout_gravity="center_horizontal"
         android:src="@drawable/default_photo"/>
 

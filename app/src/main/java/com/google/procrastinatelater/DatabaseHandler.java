@@ -101,13 +101,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         String[] columns = new String[]{KEY_ID, KEY_PROJECTNAME, KEY_TIMECMT, KEY_DUEDATE, KEY_HRSLONG,
                 KEY_MINSLONG, KEY_TIMECMT, KEY_IMGPATH, KEY_EVENTID};
         Cursor cursor = db.query(TABLE_PROJECTS, columns, KEY_ID + "=?", new String[]{String.valueOf(id)}, null, null, null, null);
-        Project project = null;
         if (cursor != null) {
             cursor.moveToFirst();
         }
-        project = new Project(Long.parseLong(cursor.getString(0)),
+        Project project = new Project(Long.parseLong(cursor.getString(0)),
                 cursor.getString(1), cursor.getString(2), cursor.getString(3), cursor.getString(4),
-                cursor.getString(5), cursor.getString(6), cursor.getString(7), cursor.getString(8));
+                cursor.getString(5), cursor.getString(6), cursor.getString(7), Long.parseLong(cursor.getString(8)));
 
         cursor.close();
         db.close();
@@ -173,9 +172,14 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_PROJECTS, null);
         if (cursor.moveToFirst()){
             do{
+                Long myEventId = Long.valueOf(-1);
+                if (cursor.getString(8) != null){
+                    myEventId = Long.parseLong(cursor.getString(8));
+                }
+
                 projects.add(new Project(Long.parseLong(cursor.getString(0)), cursor.getString(1),
                         cursor.getString(2), cursor.getString(3), cursor.getString(4),
-                        cursor.getString(5), cursor.getString(6), cursor.getString(7), cursor.getString(8)));
+                        cursor.getString(5), cursor.getString(6), cursor.getString(7), myEventId));
             }while (cursor.moveToNext());
         }
 

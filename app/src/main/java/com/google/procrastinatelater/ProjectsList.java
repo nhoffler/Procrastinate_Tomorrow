@@ -141,9 +141,9 @@ public class ProjectsList extends Activity {
 
         if (previousEventId != null && previousEventId < newEventId){ //sometimes the next event is not 1 above the previous event's id. Just take the last new event id
             //save this id
-            Toast.makeText(getApplicationContext(), newEventId + getString(R.string.event_saved) + newEventId, Toast.LENGTH_SHORT).show();
+            //Toast.makeText(getApplicationContext(), newEventId + getString(R.string.event_saved) + newEventId, Toast.LENGTH_SHORT).show();
             Logger.getLogger(getClass().getName()).info("Resume: " + newEventId + " created");
-            updatedProject.setEventId("" + newEventId);
+            updatedProject.setEventId(newEventId);
             dbHandler.updateProject(updatedProject);
         }
 
@@ -451,11 +451,11 @@ public class ProjectsList extends Activity {
                         Toast.makeText(getApplicationContext(), "Project " + title + " " + getString(R.string.project_updated), Toast.LENGTH_SHORT).show();
 
                         //delete past and future events.
-                        String eventId = aProject.getEventId();
-                        if (eventId != null){ //if there is an event for this project in the calendar
+                        Long eventId = aProject.getEventId();
+                        if (eventId != -1){ //if there is an event for this project in the calendar
                             //delete events from calendar
                             //Uri eventsUri = Uri.parse(getCalendarUriBase()+"events");
-                            Uri eventUri = ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, Long.parseLong(eventId));
+                            Uri eventUri = ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, eventId);
                             getContentResolver().delete(eventUri, null, null);
                             Logger.getLogger(getClass().getName()).info("Update: " + eventId + " deleted");
                         }
@@ -497,11 +497,11 @@ public class ProjectsList extends Activity {
                 projectsList.remove(aProject); //delete from project list sidebar
                 populateList(); //refresh project list
 
-                String eventId = aProject.getEventId();
-                if (eventId != null){ //if there is an event for this project in the calendar
+                Long eventId = aProject.getEventId();
+                if (eventId != -1){ //if there is an event for this project in the calendar
                     //delete events from calendar
                     //Uri eventsUri = Uri.parse(getCalendarUriBase()+"events");
-                    Uri eventUri = ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, Long.parseLong(eventId));
+                    Uri eventUri = ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, eventId);
                     getContentResolver().delete(eventUri, null, null);
                     Logger.getLogger(getClass().getName()).info("Delete: " + eventId + " deleted");
                 }

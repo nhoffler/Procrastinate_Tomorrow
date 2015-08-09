@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.google.procrastinatelater.HomeActivity">
+    tools:context="com.google.procrastinatelater.HomeActivity"
+    android:background="@color/contrasting_color">
 
     <LinearLayout
         android:orientation="vertical"
@@ -145,7 +146,7 @@
                     android:textAppearance="?android:attr/textAppearanceMedium"
                     android:text="@string/no_sessions"
                     android:id="@+id/projectsMessage"
-                    android:textColor="@color/contrasting_color"
+                    android:textColor="@color/neutral_color"
                     android:layout_gravity="center|top"
                     android:paddingTop="35dp"
                     android:layout_margin="10dp"
